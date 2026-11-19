@@ -21,7 +21,7 @@
    COLOUR/TYPE: green #16382b + gold #c9a24a chrome, pale guilloche paper, multi-colour inks; Barlow Condensed for stamp lettering, system PingFang TC for Chinese
    LAYOUT: phone-first, bottom tab bar, sheets slide up from the bottom */
 :root{--navy:#16382b;--navy2:#0e2a1f;--gold:#c9a24a;--gold2:#e8cf8a;--paper:#f3f1e7;--paper2:#e6ecdf;--ink:#1d2433;--mute:#6b7280;
---safe-t:env(safe-area-inset-top);--safe-b:env(safe-area-inset-bottom);color-scheme:light}
+--safe-t:var(--safe-area-inset-top,env(safe-area-inset-top));--safe-b:var(--safe-area-inset-bottom,env(safe-area-inset-bottom));color-scheme:light}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{background:var(--navy);color:var(--ink);font:16px/1.5 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;overflow:hidden}
@@ -105,6 +105,13 @@ nav button.on{color:var(--gold2)}
 .plane{width:22px;height:22px;filter:drop-shadow(0 1px 1px #fff) drop-shadow(0 0 2px #fff)}.plane svg{width:100%;height:100%;display:block}
 .route{background:#fff;border:1px solid #e1e4d8;border-radius:12px;padding:10px 12px;margin:12px 0 4px;font-size:15px;line-height:1.6}
 .route span{display:block;font-size:12px;color:var(--mute)}.route b{color:#b42335}
+.ggrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;margin:12px 0}
+.gday{grid-column:1/-1;font-size:13px;font-weight:600;color:var(--mute);padding:8px 2px 2px}
+.gp{position:relative;padding:0;border:0;aspect-ratio:1;background:#ddd;border-radius:4px;overflow:hidden}
+.gp img{width:100%;height:100%;object-fit:cover;display:block}
+.gp.on{outline:3px solid var(--gold);outline-offset:-3px}.gp.on::after{content:"✓";position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#1b1407;font-weight:800;font-size:14px;display:grid;place-items:center}
+.gp.had img{opacity:.55}.gp em{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-style:normal;padding:2px}
+.gbar{position:sticky;bottom:calc(-1 * var(--safe-b) - 18px);background:var(--paper);padding:8px 0 calc(var(--safe-b) + 10px);margin-top:4px}
 .maphint{font-size:13px;color:var(--mute);margin-top:8px}
 #lmap .leaflet-tile-pane{filter:sepia(.35) saturate(.75) hue-rotate(-8deg) brightness(1.04) contrast(.95)}
 #lmap{background:#efe9d8}
@@ -219,6 +226,33 @@ textarea{min-height:120px;resize:vertical}
 #vPrev{left:8px}#vNext{right:8px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 @media (min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.view{padding-inline:max(14px,calc(50% - 360px))}}
+#fpL,#fpLU{display:none}
+/* ---- wide screens: Galaxy Fold opened, iPad ---- */
+@media (min-width:760px) and (min-height:540px){
+ .view{padding-inline:max(16px,calc(50% - 580px))}
+ .flip{height:clamp(460px,calc(100vh - 220px),780px);perspective:2600px}
+ .flip.wide .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .flip.wide #fpCur,.flip.wide #fpUnder,.flip.wide .turn{left:50%}
+ .flip.wide #fpL,.flip.wide #fpLU{display:block;right:50%}
+ .flip.wide #fpCur>.page.paper,.flip.wide #fpUnder>.page.paper,.flip.wide .face.front>.page.paper{border-radius:2px 10px 10px 2px}
+ .flip.wide #fpL>.page,.flip.wide #fpLU>.page,.flip.wide .face.back>.page{border-radius:10px 2px 2px 10px}
+ .flip.wide.open::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:36px;transform:translateX(-50%);background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,.16) 45%,rgba(0,0,0,.22) 50%,rgba(0,0,0,.16) 55%,rgba(0,0,0,0));z-index:5;pointer-events:none}
+ .flip.wide .cover-page .twc-box{width:min(100%,calc((100vh - 220px)*.7),420px)}
+ .flip.wide .face::after{border-radius:2px 10px 10px 2px}
+ #v-map .card{display:grid;grid-template-columns:minmax(0,1fr) 270px;grid-template-rows:auto auto auto auto 1fr;column-gap:16px;align-items:start}
+ #v-map .card>h2{grid-column:1/-1}
+ #v-map .mapwrap{grid-row:2 / -1}
+ #lmap{height:calc(100vh - 230px);min-height:420px}
+ #v-map .zoom{flex-direction:column}#v-map .zoom .chip{width:100%}
+ #v-map .legend{max-height:calc(100vh - 420px);overflow:auto;align-content:flex-start}
+ #stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+ #stats>.big{grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr));margin:0}
+ #stats>.card{margin:0}
+ #v-set.on{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}#v-set .card{margin:0}
+ .sheet{left:max(0px,calc(50% - 330px));right:max(0px,calc(50% - 330px));max-height:84vh}
+ .ggrid{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .photos{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
 </style>
 </head>
 <body>
@@ -242,7 +276,7 @@ textarea{min-height:120px;resize:vertical}
 </header>
 <main>
 <section class="view on" id="v-pass">
-<div class="flip" id="flip"><div class="fp under" id="fpUnder"></div><div class="fp" id="fpCur"></div><div class="turn" id="turn"><div class="face front"></div><div class="face back"></div></div></div>
+<div class="flip" id="flip"><div class="fp under lft" id="fpLU"></div><div class="fp lft" id="fpL"></div><div class="fp under" id="fpUnder"></div><div class="fp" id="fpCur"></div><div class="turn" id="turn"><div class="face front"></div><div class="face back"></div></div></div>
 <div class="flipnav"><button id="pPrev" aria-label="上一頁">‹</button><div class="dots" id="dots"></div><button id="pNext" aria-label="下一頁">›</button></div>
 </section>
 <section class="view" id="v-map">
@@ -256,7 +290,7 @@ textarea{min-height:120px;resize:vertical}
 <div class="card"><h2>新增入境章</h2>
 <button class="btn" id="imp2">從照片匯入</button>
 <button class="btn alt" id="manual">手動新增（沒有照片或沒有定位時）</button></div>
-<div class="card"><h2>照片沒有抓到地點？</h2><div class="help">
+<div class="card" id="iosHelp"><h2>照片沒有抓到地點？</h2><div class="help">
 iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後顯示「沒有位置」，可以這樣做：
 <ol><li>打開「照片」App，選好要匯入的照片</li><li>按「分享」→ 上方「選項」→ 打開「位置」與「所有照片資料」</li><li>選「儲存到檔案」</li><li>回到這裡按匯入 → 選「瀏覽」→ 從「檔案」挑那些照片</li></ol>
 也可以在匯入時直接替沒有位置的照片指定國家與城市。</div></div>
@@ -445,7 +479,7 @@ const coverHTML=()=>`<div class="twc-wrap"><div class="twc"><div><div class="cn 
 <div><div class="pp foil">護照</div><div class="pe foil">PASSPORT</div></div>
 <svg class="echip" viewBox="0 0 40 26" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="1" width="38" height="24" rx="2"/><circle cx="20" cy="13" r="6"/><path d="M1 9h13M26 9h13M1 17h13M26 17h13"/></svg></div></div>`;
 $('#cover').innerHTML=coverHTML();
-function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const per=window.innerWidth>=700?9:6;const pages=[];
+function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const per=WIDEQ.matches?6:window.innerWidth>=700?9:6;const pages=[];
  for(let i=0;i<Math.max(1,Math.ceil(A.length/per));i++)pages.push({h:'VISAS · 簽證',l:A.slice(i*per,i*per+per)});
  for(let i=0;i<Math.ceil(D.length/per);i++)pages.push({h:'DOMESTIC · 國內紀念章',l:D.slice(i*per,i*per+per),d:1});
  PAGES=[`<div class="page cover-page"><button class="twc-box" id="coverBtn" aria-label="翻開護照">${coverHTML()}<div class="cover-hint">${T.length?'向左翻開護照 ←':'按右上角「＋ 新增」開始蓋章'}</div></button></div>`,...pages.map((P,i)=>{const pg=P.l;return `<div class="page paper${P.d?' dom':''}"><div class="page-h"><span>${P.h}</span><span>${String(i+1).padStart(2,'0')}</span></div>
@@ -454,26 +488,38 @@ function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const per=window
   <div class="page-n">— ${i+1} —</div></div>`})];
  PKEYS=[new Set(),...pages.map(P=>new Set(P.l.map(t=>t.key)))];
  if(T.length&&!renderPass.done){renderPass.done=1;PIDX=1}
- showPage(PIDX)}
+ buildUnits();showPage(PIDX)}
 /* ---------- page turning like a real book ---------- */
-let PAGES=[],PKEYS=[],PIDX=0,FLIPPING=false,JUSTDRAG=false,FDIR=0,FA=0;
+let PAGES=[],PKEYS=[],PIDX=0,UNITS=[],UIDX=0,FLIPPING=false,JUSTDRAG=false,FDIR=0,FA=0;
+/* wide screens (Fold opened, iPad): the passport lies open — two pages side by side, cover alone on the right */
+const WIDEQ=matchMedia('(min-width: 760px) and (min-height: 540px)');
+const BLANK='<div class="page paper"></div>';
+function buildUnits(){const W=WIDEQ.matches;$('#flip').classList.toggle('wide',W);
+ if(!W)UNITS=PAGES.map((p,k)=>({R:p,i:[k]}));else{UNITS=[{L:null,R:PAGES[0],i:[0]}];for(let k=1;k<PAGES.length;k+=2)UNITS.push({L:PAGES[k],R:PAGES[k+1]||BLANK,i:PAGES[k+1]?[k,k+1]:[k]})}}
 const turnEl=$('#turn'),faceF=turnEl.querySelector('.front'),faceB=turnEl.querySelector('.back');
 function bindPage(root){root.querySelectorAll('.stamp').forEach(b=>b.onclick=()=>{if(!JUSTDRAG)openTrip(b.dataset.k)});const cb=root.querySelector('.twc-box');if(cb)cb.onclick=()=>{if(!JUSTDRAG)turnTo(1)}}
-function showPage(i){PIDX=Math.max(0,Math.min(PAGES.length-1,i));const c=$('#fpCur');c.innerHTML=PAGES[PIDX];c.style.visibility='';bindPage(c);$('#fpUnder').innerHTML='';
- $('#dots').innerHTML=PAGES.length>1?PAGES.map((_,j)=>`<i class="${j===PIDX?'on':''}"></i>`).join(''):'';$('#pPrev').disabled=PIDX===0;$('#pNext').disabled=PIDX>=PAGES.length-1}
+function showPage(pi){PIDX=Math.max(0,Math.min(PAGES.length-1,pi));const u=Math.max(0,UNITS.findIndex(x=>x.i.includes(PIDX)));showUnit(u)}
+function showUnit(i){UIDX=Math.max(0,Math.min(UNITS.length-1,i));const U=UNITS[UIDX];PIDX=U.i[0];
+ const c=$('#fpCur');c.innerHTML=U.R;c.style.visibility='';bindPage(c);$('#fpUnder').innerHTML='';
+ const l=$('#fpL');l.innerHTML=U.L||'';l.style.visibility='';bindPage(l);$('#fpLU').innerHTML='';$('#flip').classList.toggle('open',!!U.L);
+ $('#dots').innerHTML=UNITS.length>1?UNITS.map((_,j)=>`<i class="${j===UIDX?'on':''}"></i>`).join(''):'';$('#pPrev').disabled=UIDX===0;$('#pNext').disabled=UIDX>=UNITS.length-1}
 function setAngle(a){FA=a;turnEl.style.transform=`rotateY(${a}deg)`;const back=a<-90;faceF.style.visibility=back?'hidden':'visible';faceB.style.visibility=back?'visible':'hidden';
- turnEl.style.setProperty('--s',(Math.sin(-a*Math.PI/180)*.32).toFixed(3));$('#fpUnder').style.setProperty('--u',((1+a/180)*.35).toFixed(3))}
-function beginFlip(dir){if(FLIPPING)return false;const ni=PIDX+dir;if(ni<0||ni>=PAGES.length)return false;FLIPPING=true;FDIR=dir;
- const turning=dir>0?PIDX:ni;faceF.innerHTML=PAGES[turning];faceB.innerHTML=turning===0?'<div class="page cover-in"></div>':'<div class="page paper back-paper"></div>';
- $('#fpUnder').innerHTML=PAGES[dir>0?ni:PIDX];$('#fpCur').style.visibility='hidden';turnEl.classList.add('on');setAngle(dir>0?0:-180);return true}
-function finishFlip(done){const from=FA,to=done?(FDIR>0?-180:0):(FDIR>0?0:-180),dur=RM?1:Math.max(180,Math.abs(to-from)/180*620),t0=performance.now();
+ turnEl.style.setProperty('--s',(Math.sin(-a*Math.PI/180)*.32).toFixed(3));$('#fpUnder').style.setProperty('--u',((1+a/180)*.35).toFixed(3));$('#fpLU').style.setProperty('--u',((-a/180)*.25).toFixed(3))}
+function beginFlip(dir){if(FLIPPING)return false;const ni=UIDX+dir;if(ni<0||ni>=UNITS.length)return false;FLIPPING=true;FDIR=dir;const cur=UNITS[UIDX],nx=UNITS[ni];
+ if(!WIDEQ.matches){const turning=dir>0?UIDX:ni;faceF.innerHTML=UNITS[turning].R;faceB.innerHTML=turning===0?'<div class="page cover-in"></div>':'<div class="page paper back-paper"></div>';
+  $('#fpUnder').innerHTML=(dir>0?nx:cur).R;$('#fpCur').style.visibility='hidden'}
+ else if(dir>0){faceF.innerHTML=cur.R;faceB.innerHTML=nx.L||BLANK;$('#fpUnder').innerHTML=nx.R;$('#fpCur').style.visibility='hidden'}
+ else{faceF.innerHTML=nx.R;faceB.innerHTML=cur.L||BLANK;$('#fpLU').innerHTML=nx.L||'';$('#fpL').style.visibility='hidden'}
+ turnEl.classList.add('on');setAngle(dir>0?0:-180);return true}
+function finishFlip(done){const from=FA,to=done?(FDIR>0?-180:0):(FDIR>0?0:-180),dur=RM?1:Math.max(180,Math.abs(to-from)/180*(WIDEQ.matches?760:620)),t0=performance.now();
  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;setAngle(from+(to-from)*e);
-  if(k<1)return requestAnimationFrame(step);turnEl.classList.remove('on');FLIPPING=false;if(done)PIDX+=FDIR;showPage(PIDX)};requestAnimationFrame(step)}
+  if(k<1)return requestAnimationFrame(step);turnEl.classList.remove('on');FLIPPING=false;showUnit(done?UIDX+FDIR:UIDX)};requestAnimationFrame(step)}
 function turnTo(dir){if(beginFlip(dir))finishFlip(true)}
+WIDEQ.addEventListener('change',()=>{if(FLIPPING)return;renderPass();if(LMAP)setTimeout(()=>LMAP.invalidateSize(),80)});
 $('#pPrev').onclick=()=>turnTo(-1);$('#pNext').onclick=()=>turnTo(1);
 document.addEventListener('keydown',e=>{if(!$('#v-pass').classList.contains('on')||$('#sheet').classList.contains('on')||$('#viewer').classList.contains('on'))return;if(e.key==='ArrowRight')turnTo(1);else if(e.key==='ArrowLeft')turnTo(-1)});
 {const fl=$('#flip');let x0=null,y0=0,drag=0,W=1;
- fl.addEventListener('touchstart',e=>{if(FLIPPING||e.touches.length!==1)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;drag=0;W=fl.clientWidth},{passive:true});
+ fl.addEventListener('touchstart',e=>{if(FLIPPING||e.touches.length!==1)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;drag=0;W=fl.clientWidth/(WIDEQ.matches?2:1)},{passive:true});
  fl.addEventListener('touchmove',e=>{if(x0==null)return;const dx=e.touches[0].clientX-x0,dy=e.touches[0].clientY-y0;
   if(!drag){if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)*1.2){const dir=dx<0?1:-1;if(!beginFlip(dir)){x0=null;return}drag=dir}else{if(Math.abs(dy)>12)x0=null;return}}
   e.preventDefault();const f=Math.min(1,Math.max(0,Math.abs(dx)/(W*.85)));setAngle(drag>0?-180*f:-180+180*f)},{passive:false});
@@ -678,21 +724,22 @@ function statsSheet(act,arg){const ALL=trips(),AB=abroad(ALL),T=AB.filter(t=>!t.
 $('#stats').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,g=b.dataset.arg;if(a==='trip'){if(g)openTrip(g)}else if(a==='country'){if(g)statsSheet('country',g)}else statsSheet(a,g)};
 /* ---------- import ---------- */
 const busy=(on,t)=>{$('#busy').classList.toggle('on',on);if(t)$('#busyT').textContent=t};
-$('#imp').onclick=$('#imp2').onclick=()=>{unlockAudio();$('#file').click()};
+$('#imp').onclick=$('#imp2').onclick=()=>{unlockAudio();pickPhotos()};
 $('#file').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;
- const before=snap();const seen=new Set(PHOTOS.map(p=>p.id));const added=[],noGps=[];
- busy(true,'讀取照片 0/'+files.length);
+ const recs=[];busy(true,'讀取照片 0/'+files.length);
  for(let i=0;i<files.length;i++){const f=files[i];busy(true,`讀取照片 ${i+1}/${files.length}`);
   let ex={};try{ex=exif(await f.arrayBuffer())}catch(err){}
-  const t=ex.t||f.lastModified||Date.now();const id=f.name+'|'+f.size+'|'+t;if(seen.has(id))continue;seen.add(id);
-  const p={id,t,lat:ex.lat??null,lon:ex.lon??null,cc:null,city:'',th:await thumb(f)};
-  if(p.lat!=null)added.push(p);else noGps.push(p)}
+  const t=ex.t||f.lastModified||Date.now();recs.push({id:f.name+'|'+f.size+'|'+t,t,lat:ex.lat??null,lon:ex.lon??null,th:await thumb(f)})}
+ processImport(recs)};
+/* shared by the web file picker and the Android gallery picker */
+async function processImport(recs){const before=snap();const seen=new Set(PHOTOS.map(p=>p.id));const added=[],noGps=[];
+ for(const r of recs){if(seen.has(r.id))continue;seen.add(r.id);const p={id:r.id,t:r.t,lat:r.lat??null,lon:r.lon??null,cc:null,city:'',th:r.th||''};if(p.lat!=null)added.push(p);else noGps.push(p)}
  for(let i=0;i<added.length;i++){const p=added[i];busy(true,`辨識地點 ${i+1}/${added.length}`);p.cc=countryAt(p.lat,p.lon);
   const g=await geocode(p.lat,p.lon);if(g.cc)p.cc=g.cc.toUpperCase();p.city=g.city||''}
  busy(false);PHOTOS.push(...added.filter(p=>p.cc));await save();
  const finish=async()=>{renderAll();const nw=newTrips(before);const H=homeCC(),att=new Set(trips().flatMap(t=>t.photos.map(p=>p.id))),lone=PHOTOS.filter(p=>p.cc===H&&!att.has(p.id)&&(added.includes(p)||noGps.includes(p))).length;
   if(nw.length)ceremony(nw);else toast(added.length||noGps.length?'照片已加入既有的入境章':'這些照片已經匯入過了')};
- if(noGps.length)askLocation(noGps,finish);else finish()};
+ if(noGps.length)askLocation(noGps,finish);else finish()}
 const ALIAS={KR:'韓國 南韓 korea',KP:'北韓 朝鮮',US:'美國 usa america',GB:'英國 uk england britain 倫敦',AE:'阿聯 杜拜 dubai uae 阿布達比',CN:'中國 大陸 china',HK:'香港 hongkong',MO:'澳門 macau macao',TW:'台灣 taiwan',JP:'日本 japan',TH:'泰國 曼谷',VN:'越南',SG:'新加坡',MY:'馬來西亞 大馬',PH:'菲律賓',ID:'印尼 峇里島 bali',NZ:'紐西蘭 紐西兰',AU:'澳洲 澳大利亞',CZ:'捷克',NL:'荷蘭',CH:'瑞士',DE:'德國',FR:'法國 巴黎',IT:'義大利 意大利',ES:'西班牙',TR:'土耳其 türkiye turkey',RU:'俄羅斯',IN:'印度',KH:'柬埔寨 吳哥',MM:'緬甸',LA:'寮國 老撾',MV:'馬爾地夫',AT:'奧地利',PT:'葡萄牙',GR:'希臘',EG:'埃及',CA:'加拿大',MX:'墨西哥'};
 const POP=['JP','KR','TH','VN','SG','HK','MO','MY','CN','PH','US','GB','FR','AU','TW'];
 const norm=s=>String(s||'').toLowerCase().replace(/臺/g,'台').replace(/\s+/g,'');
@@ -775,7 +822,7 @@ function askLocation(list,done){list.sort((a,b)=>a.t-b.t);
 $('#addBtn').onclick=()=>{unlockAudio();sheet(`<h3>新增入境章</h3><div class="sub">選一種方式</div>
  <button class="btn" id="mImp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/></svg>從照片匯入</button>
  <button class="btn alt" id="mMan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16M7 16l1-4 8-8 3 3-8 8-4 1z"/></svg>手動蓋章（沒有照片也可以）</button>`);
- $('#mImp').onclick=()=>{closeSheet();$('#file').click()};$('#mMan').onclick=()=>{$('#manual').click()}};
+ $('#mImp').onclick=()=>{closeSheet();pickPhotos()};$('#mMan').onclick=()=>{$('#manual').click()}};
 $('#manual').onclick=$('#manual2').onclick=()=>{const today=new Date().toISOString().slice(0,10);
  sheet(`<h3>手動新增入境章</h3><div class="sub">適合沒有照片，或想補登以前的旅行。</div>
  <label for="mcq">國家／地區</label>${picker('mc','')}
@@ -844,11 +891,11 @@ $('#shareBtn').onclick=async()=>{const T=trips();if(!T.length)return toast('先�
  const show=T.slice(0,9),cell=300;for(let i=0;i<show.length;i++){const im=await svgImg(stampURL(show[i]));if(!im)continue;const cx=90+(i%3)*cell+cell/2-20,cy=230+Math.floor(i/3)*340+150;
   x.save();x.translate(cx,cy);x.rotate(rot(show[i])*Math.PI/180);x.drawImage(im,-140,-140,280,280);x.restore()}
  x.fillStyle='#8a9a90';x.font='600 26px "Barlow Condensed",sans-serif';x.textAlign='center';x.fillText('— VISAS · 簽證 —',W/2,H-95);
- busy(false);c.toBlob(async b=>{const file=new File([b],'travel-passport.png',{type:'image/png'});
+ busy(false);if(NATIVE)return nativeFile('travel-passport-'+Date.now()+'.png',c.toDataURL('image/png').split(',')[1],'image/png',false);c.toBlob(async b=>{const file=new File([b],'travel-passport.png',{type:'image/png'});
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'我的旅行護照'});return}}catch(e){if(e.name==='AbortError')return}
   sheet(`<h3>我的護照頁</h3><div class="sub">長按圖片即可儲存或分享。</div><img src="${URL.createObjectURL(b)}" style="width:100%;border-radius:12px" alt="護照頁">`)},'image/png')};
 /* ---------- backup ---------- */
-$('#exp').onclick=async()=>{const blob=new Blob([JSON.stringify({v:1,photos:PHOTOS,notes:NOTES,settings:SETTINGS})],{type:'application/json'});
+$('#exp').onclick=async()=>{if(NATIVE)return nativeFile('travel-passport-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({v:1,photos:PHOTOS,notes:NOTES,settings:SETTINGS}),'application/json',true);const blob=new Blob([JSON.stringify({v:1,photos:PHOTOS,notes:NOTES,settings:SETTINGS})],{type:'application/json'});
  const file=new File([blob],'travel-passport-backup-'+new Date().toISOString().slice(0,10)+'.json',{type:'application/json'});
  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}}catch(e){if(e.name==='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;a.click();toast('備份檔已下載')};
@@ -863,7 +910,7 @@ function go(v){$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==
 $$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2400)}
 function renderAll(){renderPass();renderStats();if($('#v-map').classList.contains('on'))renderMap()}
-let rw=innerWidth;addEventListener('resize',()=>{if((innerWidth>=700)!==(rw>=700))renderPass();rw=innerWidth});
+let rw=innerWidth;addEventListener('resize',()=>{if(!WIDEQ.matches&&(innerWidth>=700)!==(rw>=700))renderPass();rw=innerWidth});
 /* ---------- boot ---------- */
 (async()=>{await DB.open();PHOTOS=(await DB.get('photos'))||[];NOTES=(await DB.get('notes'))||{};SETTINGS=(await DB.get('settings'))||{};
  {const byId=new Map(PHOTOS.map(p=>[p.id,p]));let ch=false;for(const p of [...PHOTOS]){if(!p.th&&/^m\d+e$/.test(p.id)){const base=byId.get(p.id.slice(0,-1));if(base&&base.cc===p.cc){base.tend=Math.max(base.tend||0,p.t);PHOTOS=PHOTOS.filter(x=>x!==p);ch=true}}}if(ch)save()}
@@ -875,7 +922,44 @@ let rw=innerWidth;addEventListener('resize',()=>{if((innerWidth>=700)!==(rw>=700
  $('#home').addEventListener('change',async()=>{SETTINGS.home=$('#home').value;await save();renderAll();toast(`居住地設為${cname(SETTINGS.home)}，${cname(SETTINGS.home)}不會再蓋章`)});
  $('#homeNone').onclick=async()=>{SETTINGS.home='';$('#homeq').value='';$('#home').value='';await save();renderAll();toast('已取消居住地，每個國家都會蓋章')};
  renderAll();
- if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})})();
+ if(!NATIVE&&'serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})})();
+/* ---------- Android app (Capacitor): gallery picker that keeps GPS, saving & sharing files ---------- */
+const CAPX=window.Capacitor,NATIVE=!!(CAPX&&CAPX.isNativePlatform&&CAPX.isNativePlatform());
+const NP=(m,o)=>CAPX.nativePromise('PhotoLocation',m,o||{});
+function pickPhotos(){if(NATIVE)return nativePicker();$('#file').click()}
+const b64=str=>{const u=new TextEncoder().encode(str);let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+async function nativePicker(){let acc;try{acc=await NP('requestAccess')}catch(e){return toast('無法讀取相簿：'+(e.message||e))}
+ if(acc.photos==='denied')return sheet(`<h3>需要相簿權限</h3><div class="sub">請到手機「設定 → 應用程式 → 旅行護照 → 權限」，把「相片和影片」設為允許，並允許「存取媒體位置」，才能讀取照片和拍攝地點。</div><button class="btn" id="npOk">知道了</button>`),$('#npOk').onclick=closeSheet;
+ if(!acc.location)toast('沒有允許「存取照片位置」，匯入後會抓不到地點');
+ const sel=new Set(),have=new Set(PHOTOS.map(p=>p.id));let off=0,done=false,lastDay='';
+ sheet(`<h3>從相簿選照片</h3><div class="sub">${acc.photos==='limited'?'目前只允許讀取部分照片，可到設定改成「全部允許」。':'點照片選取，或用日期一次選一整段旅行。'}</div>
+ <div class="row" style="align-items:flex-end;gap:6px"><div><label for="gfrom">從</label><input type="date" id="gfrom"></div><div><label for="gto">到</label><input type="date" id="gto"></div></div>
+ <button class="btn alt" id="grange">選取這段期間的所有照片</button>
+ <div class="ggrid" id="ggrid"></div><button class="btn alt" id="gmore">載入更多</button>
+ <div class="gbar"><button class="btn" id="gimp" disabled>匯入 0 張</button></div>`);
+ const upd=()=>{$('#gimp').textContent=`匯入 ${sel.size} 張`;$('#gimp').disabled=!sel.size};
+ const tile=it=>{const d=zdate(it.date),hd=d!==lastDay?`<div class="gday">${d}</div>`:'';lastDay=d;const id='a'+it.id;
+  return hd+`<button type="button" class="gp${sel.has(it.id)?' on':''}${have.has(id)?' had':''}" data-id="${it.id}"><img src="${it.thumb}" alt="" loading="lazy">${have.has(id)?'<em>已匯入</em>':''}</button>`};
+ const more=async()=>{if(done)return;$('#gmore').textContent='載入中…';try{const r=await NP('list',{offset:off,limit:90,thumb:220});off+=r.items.length;done=r.items.length<90;
+   $('#ggrid').insertAdjacentHTML('beforeend',r.items.map(tile).join(''))}catch(e){toast('讀取相簿失敗')}$('#gmore').textContent=done?'沒有更多照片了':'載入更多';$('#gmore').disabled=done};
+ $('#ggrid').onclick=e=>{const b=e.target.closest('.gp');if(!b)return;const id=+b.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);b.classList.toggle('on',sel.has(id));upd()};
+ $('#gmore').onclick=more;
+ $('#grange').onclick=async()=>{const a=$('#gfrom').value,z=$('#gto').value||a;if(!a)return toast('請先選日期');
+  const r=await NP('list',{from:new Date(a+'T00:00').getTime(),to:new Date(z+'T23:59:59').getTime(),limit:5000,thumb:0});
+  r.items.forEach(it=>sel.add(it.id));$$('#ggrid .gp').forEach(b=>b.classList.toggle('on',sel.has(+b.dataset.id)));upd();toast(`選取了 ${r.items.length} 張`)};
+ $('#gimp').onclick=async()=>{const ids=[...sel],recs=[];DIRTY=false;closeSheet();
+  for(let i=0;i<ids.length;i+=12){busy(true,`讀取照片 ${Math.min(i+12,ids.length)}/${ids.length}`);
+   try{const r=await NP('details',{ids:ids.slice(i,i+12),thumb:420});r.items.forEach(it=>recs.push({id:'a'+it.id,t:it.date||Date.now(),lat:it.lat??null,lon:it.lon??null,th:it.thumb||''}))}catch(e){}}
+  busy(false);processImport(recs)};
+ await more()}
+async function nativeFile(name,data,mime,isText){const sh=()=>sheet(`<h3>${esc(name)}</h3><div class="sub">要怎麼處理這個檔案？</div><button class="btn" id="fSave">存到手機</button><button class="btn alt" id="fShare">分享（LINE、雲端硬碟、Email…）</button>`);
+ sh();const payload={name,mime,data:isText?b64(data):data};
+ $('#fSave').onclick=async()=>{try{const r=await NP('saveFile',{...payload,folder:mime.startsWith('image')?'Pictures':'Download'});closeSheet();toast('已存到：'+r.path)}catch(e){toast('存檔失敗：'+(e.message||e))}};
+ $('#fShare').onclick=async()=>{try{await NP('shareFile',payload);closeSheet()}catch(e){toast('分享失敗')}}}
+window.__onBack=()=>{if($('#viewer').classList.contains('on')){$('#viewer').classList.remove('on');return true}
+ if($('#cer').classList.contains('on')){$('#cerOk').click();return true}if($('#sheet').classList.contains('on')){dismissSheet();return true}
+ if(!$('#v-pass').classList.contains('on')){go('pass');return true}return false};
+if(NATIVE){document.documentElement.classList.add('native');const h=$('#iosHelp');if(h)h.style.display='none'}
 window.__test={map:()=>LMAP,exif,countryAt,trips:()=>trips(),ceremony,stampSVG,setPhotos:p=>{PHOTOS=p;renderAll()},renderMap};
 }
 </script>
