@@ -101,6 +101,17 @@ nav button.on{color:var(--gold2)}
 .card h2{font-size:17px;margin:0 0 8px}
 .mapwrap{overflow:auto;border-radius:10px;background:#cfe0e3;-webkit-overflow-scrolling:touch;position:relative;isolation:isolate}
 #lmap{height:min(62vh,560px);width:100%;background:#d7e6ea}
+#v-map .card{display:flex;flex-direction:column;position:relative}
+#v-map .zoom{order:1;margin:0 0 8px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}#v-map .zoom .chip{flex:none}
+#v-map .legend{order:2;margin:0 0 10px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#v-map .legend>*{flex:none}
+#v-map .mapwrap{order:3;position:relative}#v-map .maphint{order:4}
+.fsbtn{order:3;position:relative;align-self:flex-end;margin:-46px 10px 6px 0;z-index:3;height:36px;padding:0 12px;border-radius:18px;border:1px solid #cfd3c6;background:#fff;color:var(--ink);font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.twohint{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);z-index:4;text-align:center;color:#fff;background:rgba(0,0,0,.55);padding:16px;border-radius:12px;font-size:16px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .2s}
+.twohint small{font-weight:400;font-size:13px}.twohint.on{opacity:1}
+#v-map .mapwrap.fs{position:fixed;inset:0;z-index:25;border-radius:0;order:0}
+#v-map .mapwrap.fs #lmap{height:100vh!important;min-height:0}
+#v-map .mapwrap.fs .leaflet-top{top:var(--safe-t)}#v-map .mapwrap.fs .leaflet-bottom{bottom:var(--safe-b)}
+body.mapfs .fsbtn{position:fixed;top:calc(var(--safe-t) + 10px);right:calc(12px + env(safe-area-inset-right));margin:0;z-index:26}
 .leaflet-container{font:14px/1.4 -apple-system,"PingFang TC",sans-serif}
 .pin{width:32px;height:32px;border-radius:50%;background:#b42335;color:#fff;display:grid;place-items:center;font:700 13px/1 -apple-system,sans-serif;border:2px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.35)}
 .pin.one{width:22px;height:22px;font-size:0}
@@ -315,8 +326,8 @@ textarea{min-height:120px;resize:vertical}
 </section>
 <section class="view" id="v-map">
 <div class="card"><h2 id="mapTitle">足跡地圖</h2>
-<div class="mapwrap" id="mapwrap"></div>
-<div class="maphint" id="mapHint">兩指縮放可以放大到城市和街道，點紅點看那裡的照片。</div><div class="zoom"><button class="chip" id="routeBtn">✈︎ 飛行路線</button><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
+<div class="mapwrap" id="mapwrap"></div><button class="fsbtn" id="fsBtn" aria-label="全螢幕地圖">⛶ 全螢幕</button><div class="twohint" id="twoHint">用兩指移動地圖<br><small>或按「⛶ 全螢幕」用單指自由拖曳</small></div>
+<div class="maphint" id="mapHint">單指上下滑動頁面，兩指移動、縮放地圖；放大到國家的大小會出現飛行路線。</div><div class="zoom"><button class="chip" id="routeBtn">✈︎ 飛行路線</button><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
 <div class="legend" id="legend"></div></div>
 </section>
 <section class="view" id="v-stats"><div id="stats"></div></section>
@@ -649,7 +660,7 @@ async function ensureShapes(countries,cities,queries=[]){if(SHAPE_BUSY||!navigat
    SHAPES[(it.kind==='c'?'c:'+it.cc:'g:'+it.k)]=ok&&/Polygon/.test(j.geojson.type)?{geo:j.geojson,name:j.name||''}:{geo:null,name:j.name||''};
    DB.set('shapes',SHAPES);if($('#v-map').classList.contains('on'))drawLayers()}
   await sleep(1100)}
- SHAPE_BUSY=false;if(rebuild&&$('#v-map').classList.contains('on'))renderMap();$('#mapHint').textContent='兩指縮放可以放大到城市和街道，放大到國家的大小會出現每趟旅程的飛行路線。'}
+ SHAPE_BUSY=false;if(rebuild&&$('#v-map').classList.contains('on'))renderMap();$('#mapHint').textContent='單指上下滑動頁面，兩指移動、縮放地圖；放大到國家的大小會出現飛行路線。'}
 let MAPDATA=null;
 function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDATA;LLAYER.clearLayers();LC=[];LCITY=[];
  for(const cc of Object.keys(vis)){const sh=SHAPES['c:'+cc];
@@ -690,9 +701,10 @@ async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T)
  $('#legend').innerHTML=Object.keys(vis).sort((a,b)=>vis[b]-vis[a]).map(a=>`<button data-cc="${a}">${GEO.m[a]?.f||''} ${esc(cname(a))}${vis[a]>1?' ×'+vis[a]:''}</button>`).join('')||'<span>還沒有足跡，匯入照片開始吧</span>';
  try{await loadLeaflet()}catch(e){$('#mapHint').textContent='目前離線，先顯示簡易地圖；連上網路後可以兩指放大到城市。';LMAP=null;return renderSvgMap()}
  if(!SHAPES_LOADED){SHAPES=(await DB.get('shapes'))||{};SHAPES_LOADED=true}
- if(!SHAPE_BUSY)$('#mapHint').textContent='兩指縮放可以放大到城市和街道，放大到國家的大小會出現每趟旅程的飛行路線。';
+ if(!SHAPE_BUSY)$('#mapHint').textContent='單指上下滑動頁面，兩指移動、縮放地圖；放大到國家的大小會出現飛行路線。';
  if(!LMAP||!document.getElementById('lmap')){$('#mapwrap').innerHTML='<div id="lmap"></div>';
   LMAP=L.map('lmap',{worldCopyJump:true,minZoom:1,maxZoom:18,zoomSnap:.5,tap:true}).setView([25,121],2);
+  if(TOUCH)setupTwoFinger();
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(LMAP);
   LLAYER=L.layerGroup().addTo(LMAP);LFIT=false;LMAP.on('zoomend',restyle);
   LMAP.on('popupopen',e=>{const el=e.popup.getElement(),b=el.querySelector('button[data-k]'),gb=el.querySelector('button[data-g]');if(b)b.onclick=()=>{LMAP.closePopup();openTrip(b.dataset.k)};
@@ -728,6 +740,16 @@ function placePhotos(g){const ph=g.ps.filter(p=>p.th),label=(SHAPES['g:'+g.k]?.n
  <div class="photos">${ph.map((p,i)=>`<img src="${esc(safeImg(p.th))}" alt="" loading="lazy" data-i="${i}">`).join('')}</div>
  ${t?`<button class="btn alt" id="ppTrip">打開這枚${t.domestic?'紀念章':'入境章'}（整趟 ${t.photos.filter(p=>p.th).length} 張）</button>`:''}`);
  $$('#sheetBody .photos img').forEach(im=>im.onclick=()=>viewer(ph,+im.dataset.i,t&&t.key));if($('#ppTrip'))$('#ppTrip').onclick=()=>openTrip(t.key)}
+/* on phones: one finger scrolls the page, two fingers move/zoom the map; full screen = one-finger dragging */
+const TOUCH=matchMedia('(pointer: coarse)').matches;let FS=false,hintT;
+function setupTwoFinger(){const el=LMAP.getContainer();if(!FS)LMAP.dragging.disable();
+ el.addEventListener('touchstart',e=>{if(FS)return;if(e.touches.length>1){LMAP.dragging.enable();$('#twoHint').classList.remove('on')}else LMAP.dragging.disable()},{passive:true,capture:true});
+ let y0=null,x0=null;el.addEventListener('touchmove',e=>{if(FS||e.touches.length!==1)return;const t=e.touches[0];if(y0===null){y0=t.clientY;x0=t.clientX;return}
+  if(Math.abs(t.clientX-x0)>24&&Math.abs(t.clientX-x0)>Math.abs(t.clientY-y0)){$('#twoHint').classList.add('on');clearTimeout(hintT);hintT=setTimeout(()=>$('#twoHint').classList.remove('on'),1400)}},{passive:true});
+ el.addEventListener('touchend',e=>{if(!e.touches.length){y0=x0=null;if(!FS)LMAP.dragging.disable()}},{passive:true})}
+function setFS(on){FS=on;const w=$('#mapwrap');w.classList.toggle('fs',on);document.body.classList.toggle('mapfs',on);$('#fsBtn').textContent=on?'✕ 關閉全螢幕':'⛶ 全螢幕';
+ if(LMAP){if(on||!TOUCH)LMAP.dragging.enable();else LMAP.dragging.disable();setTimeout(()=>LMAP.invalidateSize(),60)}}
+$('#fsBtn').onclick=()=>setFS(!FS);
 function fitAll(){if(!LMAP)return;if(LPTS.length)LMAP.fitBounds(LPTS,{padding:[36,36],maxZoom:10});else LMAP.setView([25,121],2)}
 $('#fitAll').onclick=fitAll;
 $('#routeBtn').onclick=()=>{const J=journeys(trips()),HID=SETTINGS.hideJ||{};
@@ -977,7 +999,7 @@ let wipeArmed=false;$('#wipe').onclick=async e=>{if(!wipeArmed){wipeArmed=true;e
  PHOTOS=[];NOTES={};await save();renderAll();e.target.textContent='清除全部資料';wipeArmed=false;toast('已清除')};
 $('#nameIn').onchange=async e=>{SETTINGS.name=e.target.value.trim();await save();$('#title').textContent=SETTINGS.name||'我的旅行護照'};
 /* ---------- nav ---------- */
-function go(v){$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$('#imp').style.display=$('#manual2').style.display=v==='pass'?'':'none';if(v==='map')renderMap()}
+function go(v){if(FS&&v!=='map')setFS(false);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$('#imp').style.display=$('#manual2').style.display=v==='pass'?'':'none';if(v==='map')renderMap()}
 $$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2400)}
 function renderAll(){renderPass();renderStats();if($('#v-map').classList.contains('on'))renderMap()}
@@ -1027,7 +1049,7 @@ async function nativeFile(name,data,mime,isText){const sh=()=>sheet(`<h3>${esc(n
  sh();const payload={name,mime,data:isText?b64(data):data};
  $('#fSave').onclick=async()=>{try{const r=await NP('saveFile',{...payload,folder:mime.startsWith('image')?'Pictures':'Download'});closeSheet();toast('已存到：'+r.path)}catch(e){toast('存檔失敗：'+(e.message||e))}};
  $('#fShare').onclick=async()=>{try{await NP('shareFile',payload);closeSheet()}catch(e){toast('分享失敗')}}}
-window.__onBack=()=>{if($('#viewer').classList.contains('on')){$('#viewer').classList.remove('on');return true}
+window.__onBack=()=>{if(FS){setFS(false);return true}if($('#viewer').classList.contains('on')){$('#viewer').classList.remove('on');return true}
  if($('#cer').classList.contains('on')){$('#cerOk').click();return true}if($('#sheet').classList.contains('on')){dismissSheet();return true}
  if(!$('#v-pass').classList.contains('on')){go('pass');return true}return false};
 if(NATIVE){document.documentElement.classList.add('native');const h=$('#iosHelp');if(h)h.style.display='none'}
