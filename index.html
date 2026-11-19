@@ -106,6 +106,7 @@ nav button.on{color:var(--gold2)}
 .pin.one{width:22px;height:22px;font-size:0}
 .pop b{font-size:16px}.pop .s{color:#6b7280;font-size:13px;margin:2px 0 6px}
 .pop .ph{display:grid;grid-template-columns:repeat(4,46px);gap:3px;margin:6px 0}.pop .ph img{width:46px;height:46px;object-fit:cover;border-radius:4px}
+.pop button.alt{background:#fff;color:var(--ink);border:1px solid #cfd3c6}
 .pop button{width:100%;min-height:38px;border:0;border-radius:8px;background:var(--navy);color:var(--gold2);font-weight:600;margin-top:4px}
 .flight{stroke-dasharray:1 8;stroke-linecap:round;animation:fly 1.4s linear infinite}
 @keyframes fly{to{stroke-dashoffset:-18}}
@@ -373,7 +374,7 @@ const str=(v,max)=>typeof v==='string'?v.replace(/[<>\u0000-\u001f]/g,'').slice(
 /* every record is rebuilt field by field from known types: anything else in a backup is dropped */
 function cleanPhoto(p){if(!p||typeof p!=='object'||typeof p.id!=='string'||!p.id)return null;const t=num(p.t,0,4102444800000);if(t===null)return null;
  const o={id:p.id.slice(0,200),t,lat:num(p.lat,-90,90),lon:num(p.lon,-180,180),cc:typeof p.cc==='string'&&/^[A-Z]{2}$/.test(p.cc)?p.cc:null,city:str(p.city,80),th:safeImg(p.th)};
- if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;return o}
+ if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;return o}
 function cleanNotes(n){const o={};if(n&&typeof n==='object')for(const k of Object.keys(n).slice(0,5000))if(typeof n[k]==='string')o[str(k,200)]=n[k].slice(0,20000);return o}
 function cleanSettings(x){const o={};if(!x||typeof x!=='object')return o;if(typeof x.name==='string')o.name=str(x.name,60);
  if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;
@@ -576,12 +577,13 @@ function openTrip(key,back){const t=trips().find(x=>x.key===key);if(!t)return;$(
  sheet(`<div style="display:flex;gap:12px;align-items:center"><div style="width:84px;flex:none">${stampSVG(t,uid++)}</div><div><h3>${esc(tname(t))}</h3><div class="sub">${t.domestic?esc(cname(t.cc))+' · ':''}${tdate(t)}${!t.domestic&&t.cities.length?' · '+esc(t.cities.join('、')):''}</div></div></div>
  ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><div class="photos">${ph.map((p,i)=>`<img src="${esc(safeImg(p.th))}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章是手動新增的，沒有照片。</div>'}
  ${t.journey&&t.journey.route.length>1?`<div class="route"><span>這趟旅程</span>${routeText(t)}</div>`:''}
- ${t.journey?`<div class="row" style="gap:8px">${t.journey.route.length>1||t.journey.homePts?`<button class="btn alt" id="showRoute">✈︎ 在地圖看路線</button>`:''}<button class="btn alt" id="trToggle">${t.transit?'改成一般入境章':'標記為過境／轉機'}</button></div>`:''}
+ ${t.journey?`<div class="row" style="gap:8px">${t.journey.route.length>1||t.journey.homePts?`<button class="btn alt" id="showRoute">✈︎ 在地圖看路線</button>`:''}<button class="btn alt" id="trToggle">${t.transit?'改成一般入境章':'標記為過境／轉機'}</button></div><button class="btn alt" id="addStop">＋ 補上沒拍照的轉機點</button>`:''}
  <label for="city">城市（可修改）</label><input id="city" value="${esc(t.cities.join('、'))}" placeholder="例如：京都、大阪">
  <label for="diary">旅程日記</label><textarea id="diary" placeholder="寫下這趟旅行的心得、吃了什麼、遇到誰…">${esc(NOTES[key]||'')}</textarea>
  <button class="btn" id="saveTrip">儲存</button><button class="btn alt" id="editTrip">修改這枚章的國家${ph.length?'':'／日期'}</button><button class="btn danger" id="delTrip">刪除這枚${t.domestic?'紀念章':'入境章'}</button>`,back);
  $('#editTrip').onclick=()=>editTrip(t);
  const tb=$('#trToggle');if(tb)tb.onclick=async()=>{const v=!t.transit;SETTINGS.transit=SETTINGS.transit||{};if(v===t.autoTransit)delete SETTINGS.transit[key];else SETTINGS.transit[key]=v;await save();renderAll();openTrip(key);toast(v?`${cname(t.cc)}標記為過境，不算進去過的國家`:`${cname(t.cc)}改成一般入境章`)};
+ const as=$('#addStop');if(as)as.onclick=()=>addStop(t.journey,key);
  const sr=$('#showRoute');if(sr)sr.onclick=()=>{FOCUS_J=t.jid;closeSheet();go('map')};
  $$('#sheetBody .photos img').forEach(im=>im.onclick=()=>viewer(ph,+im.dataset.i,key));
  $('#saveTrip').onclick=async()=>{NOTES[key]=$('#diary').value;const cs=$('#city').value.split(/[、,，]/).map(s=>s.trim()).filter(Boolean);
@@ -660,7 +662,7 @@ function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDAT
  for(const g of groups){const ps=g.ps,t=tripOf.get(ps[0].id),n=ps.length,a=ps[0].t,b=ps[n-1].t,label=(SHAPES['g:'+g.k]?.name)||g.city||cname(g.cc);
   const icon=L.divIcon({className:'',html:`<div class="pin${n===1?' one':''}" style="background:${inkOf(g.cc===homeCC()?g.k:g.cc)}">${n>99?'99+':n}</div>`,iconSize:n===1?[22,22]:[30,30],iconAnchor:n===1?[11,30]:[15,40]});
   const th=ps.filter(p=>p.th).slice(0,4).map(p=>`<img src="${esc(safeImg(p.th))}" alt="">`).join('');
-  L.marker([g.lat,g.lon],{icon}).bindPopup(`<div class="pop"><b>${esc(label)}</b><div class="s">${esc(cname(g.cc))} · ${zdate(a)}${dayStart(b)>dayStart(a)?' – '+zdate(b):''} · ${n} 張</div>${th?`<div class="ph">${th}</div>`:''}${t?`<button data-k="${esc(t.key)}">打開這枚${t.domestic?'紀念章':'入境章'}</button>`:''}</div>`,{maxWidth:220}).addTo(LLAYER)}
+  L.marker([g.lat,g.lon],{icon}).bindPopup(`<div class="pop"><b>${esc(label)}</b><div class="s">${esc(cname(g.cc))} · ${zdate(a)}${dayStart(b)>dayStart(a)?' – '+zdate(b):''} · ${n} 張</div>${th?`<div class="ph">${th}</div>`:''}${ps.some(p=>p.th)?`<button data-g="${esc(g.k)}">看${esc(label)}的 ${ps.filter(p=>p.th).length} 張照片</button>`:''}${t?`<button class="alt" data-k="${esc(t.key)}">打開這枚${t.domestic?'紀念章':'入境章'}</button>`:''}</div>`,{maxWidth:230}).addTo(LLAYER)}
  restyle()}
 /* ---------- flight routes: each journey drawn as dashed arcs with a little plane ---------- */
 let LROUTE=null,FOCUS_J=null,ROUTE_B={},FORCE_R=false;const ROUTE_Z=3;
@@ -693,7 +695,8 @@ async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T)
   LMAP=L.map('lmap',{worldCopyJump:true,minZoom:1,maxZoom:18,zoomSnap:.5,tap:true}).setView([25,121],2);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(LMAP);
   LLAYER=L.layerGroup().addTo(LMAP);LFIT=false;LMAP.on('zoomend',restyle);
-  LMAP.on('popupopen',e=>{const b=e.popup.getElement().querySelector('button[data-k]');if(b)b.onclick=()=>{LMAP.closePopup();openTrip(b.dataset.k)}})}
+  LMAP.on('popupopen',e=>{const el=e.popup.getElement(),b=el.querySelector('button[data-k]'),gb=el.querySelector('button[data-g]');if(b)b.onclick=()=>{LMAP.closePopup();openTrip(b.dataset.k)};
+   if(gb)gb.onclick=()=>{LMAP.closePopup();const g=MAPDATA&&MAPDATA.groups.find(x=>x.k===gb.dataset.g);if(g)placePhotos(g)}})}
  const tripOf=new Map();T.forEach(t=>t.photos.forEach(p=>tripOf.set(p.id,t)));
  const gm=new Map();const homeIn=new Set(T.filter(t=>!t.domestic).flatMap(t=>t.photos.filter(p=>p.cc===homeCC())));
  for(const p of PHOTOS){if(p.lat==null||!p.cc||homeIn.has(p))continue;const k=p.city?p.cc+'|'+p.city:p.cc+'|'+(Math.round(p.lat*20)/20)+','+(Math.round(p.lon*20)/20);(gm.get(k)||gm.set(k,[]).get(k)).push(p)}
@@ -705,6 +708,26 @@ async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T)
  const countries=Object.keys(vis).map(cc=>{const g=groups.find(x=>x.cc===cc),ll=GEO.m[cc]?.ll;return g?{cc,lat:g.lat,lon:g.lon}:ll?{cc,lat:ll[0],lon:ll[1]}:null}).filter(Boolean);
  ensureShapes(countries,groups.filter(g=>!g.k.startsWith('q|')),queries);
  setTimeout(()=>{LMAP.invalidateSize();if(!LFIT){LFIT=true;fitAll()}},60)}
+/* the photos taken in one place (a map pin), not the whole stamp */
+/* a stop with no photos (e.g. changing planes on the way home): a short manual record just before the first / after the last stay */
+function addStop(jo,backKey,backFn){const ymdhm=t=>ymd(t)+'T'+hm(t);
+ sheet(`<h3>補上轉機點</h3><div class="sub">目前路線：${jname(jo)}</div>
+ <label for="sq">在哪個國家轉機</label>${picker('s','')}
+ <label>去程還是回程</label><div class="row" style="gap:8px"><button type="button" class="chip" data-w="out">去程（出發後第一站）</button><button type="button" class="chip on" data-w="back">回程（回家前最後一站）</button></div>
+ <label for="sdt">轉機時間（大概就好）</label><input type="datetime-local" id="sdt" value="${ymdhm(jo.end+2*3600e3)}">
+ <button class="btn" id="sok">加入路線</button>`,()=>{if(backKey)openTrip(backKey);else if(backFn)backFn()});
+ bindPicker('s');let w='back';
+ $$('#sheetBody [data-w]').forEach(b=>b.onclick=()=>{w=b.dataset.w;$$('#sheetBody [data-w]').forEach(x=>x.classList.toggle('on',x===b));$('#sdt').value=ymdhm(w==='out'?jo.start-2*3600e3:jo.end+2*3600e3)});
+ $('#sok').onclick=async()=>{const cc=$('#s').value;if(!cc)return toast('請先選轉機的國家');let t=new Date($('#sdt').value).getTime();if(isNaN(t))t=w==='out'?jo.start-2*3600e3:jo.end+2*3600e3;
+  if(w==='out'&&t>=jo.start)t=jo.start-60e3;if(w==='back'&&t<=jo.end)t=jo.end+60e3;
+  const rec={id:'s'+Date.now(),t,lat:null,lon:null,cc,city:'',th:'',stop:true};PHOTOS.push(rec);
+  SETTINGS.transit=SETTINGS.transit||{};const tt=trips().find(x=>x.photos.includes(rec));if(tt&&!tt.photos.some(p=>!p.stop))SETTINGS.transit[tt.key]=true;
+  await save();DIRTY=false;closeSheet();renderAll();toast(`已把${cname(cc)}加入${w==='out'?'去程':'回程'}路線`);if(backKey&&trips().some(x=>x.key===backKey))openTrip(backKey)}}
+function placePhotos(g){const ph=g.ps.filter(p=>p.th),label=(SHAPES['g:'+g.k]?.name)||g.city||cname(g.cc),t=MAPDATA.tripOf.get(g.ps[0].id),a=g.ps[0].t,b=g.ps[g.ps.length-1].t;
+ sheet(`<h3>${esc(label)}</h3><div class="sub">${esc(cname(g.cc))} · ${zdate(a)}${dayStart(b)>dayStart(a)?' – '+zdate(b):''} · ${ph.length} 張</div>
+ <div class="photos">${ph.map((p,i)=>`<img src="${esc(safeImg(p.th))}" alt="" loading="lazy" data-i="${i}">`).join('')}</div>
+ ${t?`<button class="btn alt" id="ppTrip">打開這枚${t.domestic?'紀念章':'入境章'}（整趟 ${t.photos.filter(p=>p.th).length} 張）</button>`:''}`);
+ $$('#sheetBody .photos img').forEach(im=>im.onclick=()=>viewer(ph,+im.dataset.i,t&&t.key));if($('#ppTrip'))$('#ppTrip').onclick=()=>openTrip(t.key)}
 function fitAll(){if(!LMAP)return;if(LPTS.length)LMAP.fitBounds(LPTS,{padding:[36,36],maxZoom:10});else LMAP.setView([25,121],2)}
 $('#fitAll').onclick=fitAll;
 $('#routeBtn').onclick=()=>{const J=journeys(trips()),HID=SETTINGS.hideJ||{};
@@ -758,13 +781,14 @@ function statsSheet(act,arg){const ALL=trips(),AB=abroad(ALL),T=AB.filter(t=>!t.
   h=`<h3>${arg} 年</h3><div class="sub">${L.filter(t=>!t.domestic&&!t.transit).length} 枚入境章 · ${new Set(L.filter(t=>!t.domestic&&!t.transit).map(t=>t.cc)).size} 個國家${L.some(t=>t.domestic)?' · 國內 '+L.filter(t=>t.domestic).length+' 個地方':''}</div><ul class="list dl">${L.map(stampRow).join('')}</ul>`}
  else if(act==='journeys'){const J=journeys(ALL);h=`<h3>出國旅程 · ${J.length} 趟</h3><div class="sub">從離開${homeCC()?cname(homeCC()):'家'}到回來算一趟</div><ul class="list dl">${J.map(jo=>rowB(`data-jid="${jo.id}"`,`${jdate(jo)}<small>${jname(jo)}</small>`,Math.round((dayStart(jo.end)-dayStart(jo.start))/DAY)+1+' 天')).join('')}</ul>`}
  else if(act==='journey'){const jo=journeys(ALL).find(x=>x.id===arg);if(!jo)return;const st=[...new Set(jo.route.map(r=>r.seg.stamp))];
-  h=`<h3>${jdate(jo)}</h3><div class="route"><span>路線</span>${jname(jo)}</div><button class="btn alt" data-route="${jo.id}">✈︎ 在地圖看路線</button><ul class="list dl">${st.map(stampRow).join('')}</ul>`}
+  h=`<h3>${jdate(jo)}</h3><div class="route"><span>路線</span>${jname(jo)}</div><button class="btn alt" data-route="${jo.id}">✈︎ 在地圖看路線</button><button class="btn alt" data-stop="${jo.id}">＋ 補上沒拍照的轉機點</button><ul class="list dl">${st.map(stampRow).join('')}</ul>`}
  else if(act==='domestic'){const by={};D.forEach(t=>{const c=t.cities[0];(by[c]=by[c]||[]).push(t)});
   h=`<h3>國內旅遊 · ${Object.keys(by).length} 個地方</h3><ul class="list dl">${Object.keys(by).map(c=>rowB(`data-trip="${esc(by[c][0].key)}"`,`🏞️ ${esc(c)}`,`${by[c].length} 次 · ${by[c][0].nodate?'日期未填':zdate(by[c][0].start)}`)).join('')}</ul>`}
  else if(act==='country'){const L=AB.filter(t=>t.cc===arg),o=bycc[arg];
   h=`<h3>${flagOf(arg)} ${esc(cname(arg))}</h3><div class="sub">${o?o.n+' 次 · 共 '+o.d+' 天':'只有過境'}</div>${o&&o.cities.size?`<div class="legend">${[...o.cities].map(c=>`<span>${esc(c)}</span>`).join('')}</div>`:''}<ul class="list dl" style="margin-top:8px">${L.map(stampRow).join('')}</ul>`}
  sheet(h);
- $('#sheetBody').onclick=e=>{const b=e.target.closest('[data-trip],[data-cc],[data-jid],[data-route]');if(!b)return;$('#sheetBody').onclick=null;
+ $('#sheetBody').onclick=e=>{const b=e.target.closest('[data-trip],[data-cc],[data-jid],[data-route],[data-stop]');if(!b)return;$('#sheetBody').onclick=null;
+  if(b.dataset.stop){const jo=journeys(trips()).find(x=>x.id===b.dataset.stop);if(jo)addStop(jo,null,back);return}
   if(b.dataset.trip)openTrip(b.dataset.trip,back);else if(b.dataset.cc)statsSheet('country',b.dataset.cc);else if(b.dataset.jid)statsSheet('journey',b.dataset.jid);else{FOCUS_J=b.dataset.route;closeSheet();go('map')}}}
 $('#stats').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,g=b.dataset.arg;if(a==='trip'){if(g)openTrip(g)}else if(a==='country'){if(g)statsSheet('country',g)}else statsSheet(a,g)};
 /* ---------- import ---------- */
