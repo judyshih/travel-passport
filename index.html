@@ -100,6 +100,11 @@ nav button.on{color:var(--gold2)}
 .pop b{font-size:16px}.pop .s{color:#6b7280;font-size:13px;margin:2px 0 6px}
 .pop .ph{display:grid;grid-template-columns:repeat(4,46px);gap:3px;margin:6px 0}.pop .ph img{width:46px;height:46px;object-fit:cover;border-radius:4px}
 .pop button{width:100%;min-height:38px;border:0;border-radius:8px;background:var(--navy);color:var(--gold2);font-weight:600;margin-top:4px}
+.flight{stroke-dasharray:1 8;stroke-linecap:round;animation:fly 1.4s linear infinite}
+@keyframes fly{to{stroke-dashoffset:-18}}
+.plane{width:22px;height:22px;filter:drop-shadow(0 1px 1px #fff) drop-shadow(0 0 2px #fff)}.plane svg{width:100%;height:100%;display:block}
+.route{background:#fff;border:1px solid #e1e4d8;border-radius:12px;padding:10px 12px;margin:12px 0 4px;font-size:15px;line-height:1.6}
+.route span{display:block;font-size:12px;color:var(--mute)}.route b{color:#b42335}
 .maphint{font-size:13px;color:var(--mute);margin-top:8px}
 #lmap .leaflet-tile-pane{filter:sepia(.35) saturate(.75) hue-rotate(-8deg) brightness(1.04) contrast(.95)}
 #lmap{background:#efe9d8}
@@ -335,22 +340,45 @@ async function thumb(file,max=420){let src;try{src=await createImageBitmap(file)
 /* ---------- trips (derived) ---------- */
 const homeCC=()=>SETTINGS.home===undefined?'TW':(SETTINGS.home||'');
 const HOME_WIN=2*DAY;
-function trips(){const H=homeCC(),by={},home=[];for(const p of PHOTOS){if(!p.cc)continue;if(p.cc===H){home.push(p);continue}(by[p.cc]=by[p.cc]||[]).push(p)}
- const out=[];for(const cc in by){const arr=by[cc].sort((a,b)=>a.t-b.t);let cur=null;
-  for(const p of arr){if(!cur||p.t-cur.end>GAP){cur={cc,start:p.t,end:p.t,photos:[],cities:[]};out.push(cur)}cur.end=Math.max(cur.end,p.tend||p.t);cur.photos.push(p);if(p.city&&!cur.cities.includes(p.city))cur.cities.push(p.city)}}
- out.forEach(t=>{const d=new Date(t.start);t.nodate=t.photos.every(p=>p.nodate);t.key=t.nodate?t.cc+'-visited':t.cc+'-'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();t.days=Math.max(1,Math.round((dayStart(t.end)-dayStart(t.start))/DAY)+1)});
- // photos taken at home (e.g. at the airport) within 2 days before departure / after return go into that trip
+const JGAP=10*DAY,TRANSIT_MAX=30*3600e3;
+const dkey=(cc,t)=>{const d=new Date(t);return cc+'-'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const dayN=t=>Math.round(dayStart(t)/DAY);
+/* Build stamps.
+   1) records abroad → "segments" (a continuous stay in one country)
+   2) segments close in time → one "journey" (leaving home → coming back)
+   3) inside a journey every country gets ONE stamp, however many times you entered it;
+      a short stop at the very start/end of a multi-country journey counts as a transit (過境) */
+function trips(){const H=homeCC(),foreign=[],home=[],nod={};
+ for(const p of PHOTOS){if(!p.cc)continue;if(p.cc===H)home.push(p);else if(p.nodate)(nod[p.cc]=nod[p.cc]||[]).push(p);else foreign.push(p)}
+ foreign.sort((a,b)=>a.t-b.t);
+ const segs=[];let sg=null;
+ for(const p of foreign){const pe=p.tend||p.t;if(sg&&sg.cc===p.cc&&p.t-sg.end<=GAP){sg.end=Math.max(sg.end,pe);sg.photos.push(p)}else{sg={cc:p.cc,start:p.t,end:pe,photos:[p]};segs.push(sg)}}
+ const J=[];let jr=null;
+ const homeT=home.filter(p=>!p.nodate).map(p=>p.t);
+ /* stays chain into one journey unless you came home in between (a photo at home) or nothing for 10+ days */
+ for(const x of segs){if(jr&&x.start-jr.end<=JGAP&&!homeT.some(h=>h>jr.end+12*3600e3&&h<x.start-12*3600e3)){jr.segs.push(x);jr.end=Math.max(jr.end,x.end)}else{jr={start:x.start,end:x.end,segs:[x]};J.push(jr)}}
+ const out=[],TR=SETTINGS.transit||{};
+ for(const jo of J){const ccs=[...new Set(jo.segs.map(x=>x.cc))];jo.id=dkey('J',jo.start);
+  jo.segs.forEach((x,i)=>{x.autoT=ccs.length>1&&x.end-x.start<=TRANSIT_MAX&&(i===0||i===jo.segs.length-1)});
+  jo.route=[];for(const x of jo.segs){const l=jo.route[jo.route.length-1];if(l&&l.seg.cc===x.cc)continue;jo.route.push({seg:x})}
+  for(const cc of ccs){const ss=jo.segs.filter(x=>x.cc===cc),key=dkey(cc,ss[0].start);
+   const auto=ss.every(x=>x.autoT),transit=TR[key]===undefined?auto:!!TR[key];
+   const days=new Set();ss.forEach(x=>{for(let d=dayN(x.start);d<=dayN(x.end);d++)days.add(d)});
+   const t={cc,key,jid:jo.id,journey:jo,transit,autoTransit:auto,start:ss[0].start,end:Math.max(...ss.map(x=>x.end)),visits:ss.map(x=>[x.start,x.end]),photos:ss.flatMap(x=>x.photos),cities:[],days:days.size};
+   t.photos.forEach(p=>{if(p.city&&!t.cities.includes(p.city))t.cities.push(p.city)});ss.forEach(x=>x.stamp=t);out.push(t)}}
+ for(const cc in nod){const ps=nod[cc];out.push({cc,key:cc+'-visited',nodate:true,start:0,end:0,photos:ps,cities:[...new Set(ps.map(p=>p.city).filter(Boolean))],days:1})}
+ // photos taken at home (e.g. at the airport) within 2 days before departure / after return go into that journey
  const folded=new Set();
- for(const p of home){if(p.nodate)continue;let best=null,bd=Infinity;
-  for(const t of out){if(t.nodate)continue;const lo=dayStart(t.start)-HOME_WIN,hi=dayStart(t.end)+DAY+HOME_WIN;if(p.t<lo||p.t>=hi)continue;const d=p.t<t.start?t.start-p.t:p.t>t.end?p.t-t.end:0;if(d<bd){bd=d;best=t}}
-  if(best){best.photos.push(p);best.home=true;folded.add(p)}}
+ for(const p of home){if(p.nodate)continue;const jo=J.find(x=>p.t>=dayStart(x.start)-HOME_WIN&&p.t<dayStart(x.end)+DAY+HOME_WIN);if(!jo)continue;
+  const seg=p.t<jo.start?jo.segs[0]:p.t>jo.end?jo.segs[jo.segs.length-1]:jo.segs.reduce((b,x)=>Math.abs(x.start-p.t)<Math.abs(b.start-p.t)?x:b);
+  seg.stamp.photos.push(p);seg.stamp.home=true;jo.homePts=(jo.homePts||[]).concat(p.lat!=null?[[p.lat,p.lon]]:[]);folded.add(p)}
  out.forEach(t=>{if(t.home)t.photos.sort((a,b)=>a.t-b.t)});
  // the rest of the home-country photos become domestic trips, one per place (souvenir stamps, like Taiwan's 紀念章)
  const cur={};for(const p of home.filter(p=>!folded.has(p)).sort((a,b)=>a.t-b.t)){const c=p.city||cname(H);let t=cur[c];
   if(!t||p.t-t.end>GAP||!!p.nodate!==t.nd){t=cur[c]={cc:H,domestic:true,nd:!!p.nodate,start:p.t,end:p.tend||p.t,photos:[],cities:[c]};out.push(t)}
   t.end=Math.max(t.end,p.tend||p.t);t.photos.push(p)}
  out.forEach(t=>{if(!t.domestic)return;const d=new Date(t.start);t.nodate=t.nd;t.key='D-'+t.cities[0]+'-'+(t.nodate?'visited':d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate());t.days=Math.max(1,Math.round((dayStart(t.end)-dayStart(t.start))/DAY)+1)});
- return out.sort((a,b)=>(a.nodate-b.nodate)||b.start-a.start)}
+ return out.sort((a,b)=>(a.nodate-b.nodate)||b.start-a.start||(a.transit-b.transit))}
 function snap(){return trips().map(t=>({key:t.key,cc:t.cc,ids:new Set(t.photos.map(p=>p.id))}))}
 /* trips that did not exist before (a record merged into an existing trip of the same country is not new) + carry diary notes over when a trip's key changed */
 function newTrips(S){const now=trips();let moved=false;
@@ -360,7 +388,9 @@ function newTrips(S){const now=trips();let moved=false;
  return now.filter(t=>!S.some(o=>o.cc===t.cc&&t.photos.some(p=>o.ids.has(p.id))))}
 const abroad=T=>T.filter(t=>!t.domestic),domestic=T=>T.filter(t=>t.domestic);
 const tname=t=>t.domestic?t.cities[0]:cname(t.cc);
-const tdate=t=>t.nodate?'日期未填':zdate(t.start)+(t.days>1?' – '+zdate(t.end):'')+' · '+t.days+' 天';
+const md=t=>{const d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()};
+const tdate=t=>{if(t.nodate)return'日期未填';if(t.visits&&t.visits.length>1)return new Date(t.start).getFullYear()+' · '+t.visits.map(([a,b])=>dayStart(a)===dayStart(b)?md(a):md(a)+'–'+md(b)).join('、')+' · 共 '+t.days+' 天';return zdate(t.start)+(t.days>1?' – '+zdate(t.end):'')+' · '+t.days+' 天'};
+const routeText=t=>t.journey?t.journey.route.map(r=>{const st=r.seg.stamp;return (st===t?'<b>':'')+esc(cname(r.seg.cc))+(st&&st.transit?'（過境）':'')+(st===t?'</b>':'')}).join(' → '):'';
 const dayStart=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
 const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 const fdate=t=>{const d=new Date(t);return String(d.getDate()).padStart(2,'0')+' '+MON[d.getMonth()]+' '+d.getFullYear()};
@@ -372,6 +402,9 @@ function stampSVG(t,uid){const h=hash(t.key),c=INKS[h%INKS.length],shape=(h>>3)%
  const cn=esc(cname(t.cc)),en=esc(ename(t.cc)).slice(0,20),city=esc((t.cities[0]||'').slice(0,10)),dt=t.nodate?'VISITED':fdate(t.start);
  const T=(x,y,s,txt,w=700,f="'Barlow Condensed','Avenir Next Condensed','Arial Narrow'")=>`<text x="${x}" y="${y}" font-size="${s}" font-weight="${w}" text-anchor="middle" font-family="${f},sans-serif" fill="${c}">${txt}</text>`;
  const CJ=(x,y,s,txt)=>`<text x="${x}" y="${y}" font-size="${s}" font-weight="700" text-anchor="middle" font-family="PingFang TC,Noto Sans TC,sans-serif" fill="${c}">${txt}</text>`;
+ if(t.transit){const fl=GEO?.m[t.cc]?.f||'',cs2=cn.length>5?14:18;
+  const gt=`<circle cx="100" cy="100" r="64" fill="none" stroke="${c}" stroke-width="4" stroke-dasharray="10 5"/><circle cx="100" cy="100" r="55" fill="none" stroke="${c}" stroke-width="1.4"/>${T(100,93,12,'TRANSIT · 過境')}${CJ(100,116,cs2,cn)}${T(100,135,13,t.nodate?'VISITED':fdate(t.start))}`;
+  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g filter="url(#ink)" opacity=".9">${gt}</g>${fl?`<text x="100" y="77" font-size="18" text-anchor="middle" font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif" opacity=".85">${fl}</text>`:''}</svg>`}
  if(t.domestic){const nm=esc(t.cities[0]||'').slice(0,8),fs=nm.length<=3?34:nm.length<=5?26:20;
   const gd=`<rect x="22" y="26" width="156" height="148" rx="28" fill="none" stroke="${c}" stroke-width="5"/><rect x="31" y="35" width="138" height="130" rx="20" fill="none" stroke="${c}" stroke-width="1.6"/>
   ${T(100,62,13,'SOUVENIR · 紀念章')}${CJ(100,74+fs*.9,fs,nm)}<line x1="46" y1="${86+fs*.9}" x2="154" y2="${86+fs*.9}" stroke="${c}" stroke-width="1.4"/>${T(100,108+fs*.9,17,t.nodate?'VISITED':fdate(t.start))}
@@ -406,7 +439,7 @@ function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const per=window
  for(let i=0;i<Math.max(1,Math.ceil(A.length/per));i++)pages.push({h:'VISAS · 簽證',l:A.slice(i*per,i*per+per)});
  for(let i=0;i<Math.ceil(D.length/per);i++)pages.push({h:'DOMESTIC · 國內紀念章',l:D.slice(i*per,i*per+per),d:1});
  PAGES=[`<div class="page cover-page"><button class="twc-box" id="coverBtn" aria-label="翻開護照">${coverHTML()}<div class="cover-hint">${T.length?'向左翻開護照 ←':'按右上角「＋ 新增」開始蓋章'}</div></button></div>`,...pages.map((P,i)=>{const pg=P.l;return `<div class="page paper${P.d?' dom':''}"><div class="page-h"><span>${P.h}</span><span>${String(i+1).padStart(2,'0')}</span></div>
-  ${pg.length?`<div class="grid">${pg.map(t=>`<button class="stamp" data-k="${esc(t.key)}" style="transform:rotate(${rot(t)}deg)" aria-label="${esc(tname(t))} ${t.nodate?'':zdate(t.start)}">${stampSVG(t,uid++)}</button>`).join('')}</div>`
+  ${pg.length?`<div class="grid">${pg.map(t=>`<button class="stamp" data-k="${esc(t.key)}" style="transform:rotate(${rot(t)}deg)${t.transit?' scale(.8)':''}" aria-label="${esc(tname(t))} ${t.nodate?'':zdate(t.start)}">${stampSVG(t,uid++)}</button>`).join('')}</div>`
   :`<div class="empty"><b>${D.length?'還沒有出國的入境章':'這本護照還是空白的'}</b>按右上角「＋ 新增」，選幾張旅行時拍的照片；沒有照片的國家也可以手動蓋章。選好照片後，就會自動辨識地點，替你蓋上第一枚入境章。</div>`}
   <div class="page-n">— ${i+1} —</div></div>`})];
  PKEYS=[new Set(),...pages.map(P=>new Set(P.l.map(t=>t.key)))];
@@ -441,10 +474,14 @@ function openTrip(key){const t=trips().find(x=>x.key===key);if(!t)return;
  const ph=t.photos.filter(p=>p.th);
  sheet(`<div style="display:flex;gap:12px;align-items:center"><div style="width:84px;flex:none">${stampSVG(t,uid++)}</div><div><h3>${esc(tname(t))}</h3><div class="sub">${t.domestic?esc(cname(t.cc))+' · ':''}${tdate(t)}${!t.domestic&&t.cities.length?' · '+esc(t.cities.join('、')):''}</div></div></div>
  ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><div class="photos">${ph.map((p,i)=>`<img src="${p.th}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章是手動新增的，沒有照片。</div>'}
+ ${t.journey&&t.journey.route.length>1?`<div class="route"><span>這趟旅程</span>${routeText(t)}</div>`:''}
+ ${t.journey?`<div class="row" style="gap:8px">${t.journey.route.length>1||t.journey.homePts?`<button class="btn alt" id="showRoute">✈︎ 在地圖看路線</button>`:''}<button class="btn alt" id="trToggle">${t.transit?'改成一般入境章':'標記為過境／轉機'}</button></div>`:''}
  <label for="city">城市（可修改）</label><input id="city" value="${esc(t.cities.join('、'))}" placeholder="例如：京都、大阪">
  <label for="diary">旅程日記</label><textarea id="diary" placeholder="寫下這趟旅行的心得、吃了什麼、遇到誰…">${esc(NOTES[key]||'')}</textarea>
  <button class="btn" id="saveTrip">儲存</button><button class="btn alt" id="editTrip">修改這枚章的國家${ph.length?'':'／日期'}</button><button class="btn danger" id="delTrip">刪除這枚${t.domestic?'紀念章':'入境章'}</button>`);
  $('#editTrip').onclick=()=>editTrip(t);
+ const tb=$('#trToggle');if(tb)tb.onclick=async()=>{const v=!t.transit;SETTINGS.transit=SETTINGS.transit||{};if(v===t.autoTransit)delete SETTINGS.transit[key];else SETTINGS.transit[key]=v;await save();renderAll();openTrip(key);toast(v?`${cname(t.cc)}標記為過境，不算進去過的國家`:`${cname(t.cc)}改成一般入境章`)};
+ const sr=$('#showRoute');if(sr)sr.onclick=()=>{FOCUS_J=t.jid;closeSheet();go('map')};
  $$('#sheetBody .photos img').forEach(im=>im.onclick=()=>viewer(ph,+im.dataset.i,key));
  $('#saveTrip').onclick=async()=>{NOTES[key]=$('#diary').value;const cs=$('#city').value.split(/[、,，]/).map(s=>s.trim()).filter(Boolean);
   if(cs.join()!==t.cities.join()){t.photos.forEach((p,i)=>p.city=cs[0]||'');}await save();closeSheet();renderAll();toast('已儲存')};
@@ -491,7 +528,7 @@ const inkOf=cc=>INKS[hash(cc)%INKS.length];
 /* country / city colour by zoom: strong when zoomed out, soft wash over streets when zoomed in */
 const cStyle=()=>{const z=LMAP?LMAP.getZoom():2;return{color:'#a07c22',weight:z<5?1.2:2,opacity:.9,fillColor:'#d9b04a',fillOpacity:z<4?.42:z<7?.26:.14,interactive:false}};
 const kStyle=cc=>{const z=LMAP?LMAP.getZoom():2,c=inkOf(cc);return{color:c,weight:z<8?1.5:2.5,opacity:.95,dashArray:z>=8?'6 4':null,fillColor:c,fillOpacity:z<6?.55:z<10?.3:.16,interactive:false}};
-function restyle(){if(!LMAP)return;const z=LMAP.getZoom();LC.forEach(l=>l.setStyle(cStyle()));LCITY.forEach(([l,cc])=>l.setStyle(kStyle(cc)));
+function restyle(){if(!LMAP)return;const z=LMAP.getZoom();showRoutes();LC.forEach(l=>l.setStyle(cStyle()));LCITY.forEach(([l,cc])=>l.setStyle(kStyle(cc)));
  LMAP.getContainer().classList.toggle('show-lbl',z>=5);LMAP.getContainer().classList.toggle('far',z<4)}
 /* accurate boundaries from OpenStreetMap (Nominatim), fetched once per place and kept on the phone */
 async function nomi(lat,lon,zoom,th){const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
@@ -509,7 +546,7 @@ async function ensureShapes(countries,cities,queries=[]){if(SHAPE_BUSY||!navigat
    SHAPES[(it.kind==='c'?'c:'+it.cc:'g:'+it.k)]=ok&&/Polygon/.test(j.geojson.type)?{geo:j.geojson,name:j.name||''}:{geo:null,name:j.name||''};
    DB.set('shapes',SHAPES);if($('#v-map').classList.contains('on'))drawLayers()}
   await sleep(1100)}
- SHAPE_BUSY=false;if(rebuild&&$('#v-map').classList.contains('on'))renderMap();$('#mapHint').textContent='兩指縮放可以放大到城市和街道，點紅點看那裡的照片。'}
+ SHAPE_BUSY=false;if(rebuild&&$('#v-map').classList.contains('on'))renderMap();$('#mapHint').textContent='兩指縮放可以放大到城市和街道，放大到國家的大小會出現每趟旅程的飛行路線。'}
 let MAPDATA=null;
 function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDATA;LLAYER.clearLayers();LC=[];LCITY=[];
  for(const cc of Object.keys(vis)){const sh=SHAPES['c:'+cc];
@@ -524,12 +561,32 @@ function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDAT
   const th=ps.filter(p=>p.th).slice(0,4).map(p=>`<img src="${p.th}" alt="">`).join('');
   L.marker([g.lat,g.lon],{icon}).bindPopup(`<div class="pop"><b>${esc(label)}</b><div class="s">${esc(cname(g.cc))} · ${zdate(a)}${dayStart(b)>dayStart(a)?' – '+zdate(b):''} · ${n} 張</div>${th?`<div class="ph">${th}</div>`:''}${t?`<button data-k="${esc(t.key)}">打開這枚${t.domestic?'紀念章':'入境章'}</button>`:''}</div>`,{maxWidth:220}).addTo(LLAYER)}
  restyle()}
-async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T).forEach(t=>vis[t.cc]=(vis[t.cc]||0)+1);const nd=new Set(domestic(T).map(t=>t.cities[0])).size;
+/* ---------- flight routes: each journey drawn as dashed arcs with a little plane ---------- */
+let LROUTE=null,FOCUS_J=null,ROUTE_B={},FORCE_R=false;const ROUTE_Z=3;
+function segPoint(seg){const ps=seg.photos.filter(p=>p.lat!=null);if(ps.length)return[ps.reduce((a,p)=>a+p.lat,0)/ps.length,ps.reduce((a,p)=>a+p.lon,0)/ps.length];
+ const m=seg.photos.find(p=>p.city&&SHAPES['g:q|'+p.cc+'|'+p.city]?.lat!=null);if(m){const sh=SHAPES['g:q|'+m.cc+'|'+m.city];return[sh.lat,sh.lon]}const ll=GEO.m[seg.cc]?.ll;return ll?[ll[0],ll[1]]:null}
+function arc(a,b){let [y1,x1]=a,[y2,x2]=b;if(Math.abs(x2-x1)>180)x2+=x2<x1?360:-360;const mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1;
+ let px=-dy/L,py=dx/L;if(py<0){px=-px;py=-py}const k=Math.min(.22*L,18),cx=mx+px*k,cy=my+py*k;const pts=[];for(let i=0;i<=28;i++){const t=i/28,u=1-t;pts.push([u*u*y1+2*u*t*cy+t*t*y2,u*u*x1+2*u*t*cx+t*t*x2])}
+ return{pts,mid:pts[14],ang:Math.atan2(-(y2-y1),x2-x1)*180/Math.PI}}
+function buildRoutes(T,groups){if(!LMAP)return;FORCE_R=!!FOCUS_J;if(LROUTE)LROUTE.remove();LROUTE=L.layerGroup();ROUTE_B={};const H=homeCC(),hll=H&&GEO.m[H]?.ll;
+ const js=[...new Map(abroad(T).filter(t=>t.journey).map(t=>[t.jid,t.journey])).values()];
+ for(const jo of js){const pts=[];const home=jo.homePts&&jo.homePts.length?[jo.homePts.reduce((a,p)=>a+p[0],0)/jo.homePts.length,jo.homePts.reduce((a,p)=>a+p[1],0)/jo.homePts.length]:hll?[hll[0],hll[1]]:null;
+  if(home)pts.push({p:home,home:1});for(const r of jo.route){const q=segPoint(r.seg);if(q)pts.push({p:q,tr:r.seg.stamp?.transit,cc:r.seg.cc})}if(home)pts.push({p:home,home:1});
+  if(pts.length<2)continue;const on=FOCUS_J===jo.id,col=on?'#b42335':'#8a6a1f';const all=[];
+  for(let i=1;i<pts.length;i++){const A=arc(pts[i-1].p,pts[i].p);all.push(...A.pts);
+   L.polyline(A.pts,{color:col,weight:on?3.5:2.4,opacity:on?1:.85,className:'flight',interactive:false}).addTo(LROUTE);
+   L.marker(A.mid,{interactive:false,icon:L.divIcon({className:'',iconSize:[22,22],html:`<div class="plane" style="transform:rotate(${A.ang.toFixed(0)}deg)"><svg viewBox="0 0 24 24"><path d="M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z" fill="${col}"/></svg></div>`})}).addTo(LROUTE)}
+  pts.filter(x=>x.tr).forEach(x=>L.circleMarker(x.p,{radius:5,color:col,weight:2,fillColor:'#fff',fillOpacity:1,interactive:false}).bindTooltip(esc(cname(x.cc))+' 過境',{permanent:false}).addTo(LROUTE));
+  ROUTE_B[jo.id]=all}
+ showRoutes();
+ if(FOCUS_J&&ROUTE_B[FOCUS_J]){const b=ROUTE_B[FOCUS_J];FOCUS_J=null;LFIT=true;setTimeout(()=>{LMAP.fitBounds(b,{padding:[30,30],maxZoom:7});$('#mapwrap').scrollIntoView({block:'center'})},120)}}
+function showRoutes(){if(!LMAP||!LROUTE)return;const z=LMAP.getZoom(),want=z>=ROUTE_Z||FORCE_R;if(want&&!LMAP.hasLayer(LROUTE))LROUTE.addTo(LMAP);else if(!want&&LMAP.hasLayer(LROUTE))LROUTE.remove()}
+async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T).filter(t=>!t.transit).forEach(t=>vis[t.cc]=(vis[t.cc]||0)+1);const nd=new Set(domestic(T).map(t=>t.cities[0])).size;
  $('#mapTitle').textContent=`足跡地圖 · ${Object.keys(vis).length} 個國家${nd?` · 國內 ${nd} 個地方`:''}`;
  $('#legend').innerHTML=Object.keys(vis).sort((a,b)=>vis[b]-vis[a]).map(a=>`<button data-cc="${a}">${GEO.m[a]?.f||''} ${esc(cname(a))}${vis[a]>1?' ×'+vis[a]:''}</button>`).join('')||'<span>還沒有足跡，匯入照片開始吧</span>';
  try{await loadLeaflet()}catch(e){$('#mapHint').textContent='目前離線，先顯示簡易地圖；連上網路後可以兩指放大到城市。';LMAP=null;return renderSvgMap()}
  if(!SHAPES_LOADED){SHAPES=(await DB.get('shapes'))||{};SHAPES_LOADED=true}
- if(!SHAPE_BUSY)$('#mapHint').textContent='兩指縮放可以放大到城市和街道，點紅點看那裡的照片。';
+ if(!SHAPE_BUSY)$('#mapHint').textContent='兩指縮放可以放大到城市和街道，放大到國家的大小會出現每趟旅程的飛行路線。';
  if(!LMAP||!document.getElementById('lmap')){$('#mapwrap').innerHTML='<div id="lmap"></div>';
   LMAP=L.map('lmap',{worldCopyJump:true,minZoom:1,maxZoom:18,zoomSnap:.5,tap:true}).setView([25,121],2);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(LMAP);
@@ -542,19 +599,19 @@ async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T)
  // manually added places (no GPS) are placed by looking up their name
  const qm=new Map();for(const p of PHOTOS){if(p.lat!=null||!p.cc||!p.city||homeIn.has(p))continue;const k='q|'+p.cc+'|'+p.city;(qm.get(k)||qm.set(k,[]).get(k)).push(p)}
  const queries=[];for(const [k,ps] of qm){const sh=SHAPES['g:'+k];if(sh&&sh.lat!=null){ps.sort((a,b)=>a.t-b.t);groups.push({k,ps,cc:ps[0].cc,city:ps[0].city,lat:sh.lat,lon:sh.lon})}else if(!sh)queries.push({k,cc:ps[0].cc,city:ps[0].city})}
- LPTS=groups.map(g=>[g.lat,g.lon]);MAPDATA={vis,groups,tripOf};drawLayers();
+ LPTS=groups.map(g=>[g.lat,g.lon]);buildRoutes(T,groups);MAPDATA={vis,groups,tripOf};drawLayers();
  const countries=Object.keys(vis).map(cc=>{const g=groups.find(x=>x.cc===cc),ll=GEO.m[cc]?.ll;return g?{cc,lat:g.lat,lon:g.lon}:ll?{cc,lat:ll[0],lon:ll[1]}:null}).filter(Boolean);
  ensureShapes(countries,groups.filter(g=>!g.k.startsWith('q|')),queries);
  setTimeout(()=>{LMAP.invalidateSize();if(!LFIT){LFIT=true;fitAll()}},60)}
 function fitAll(){if(!LMAP)return;if(LPTS.length)LMAP.fitBounds(LPTS,{padding:[36,36],maxZoom:10});else LMAP.setView([25,121],2)}
 $('#fitAll').onclick=fitAll;
-$('#fitWorld').onclick=()=>LMAP?LMAP.setView([25,121],1.5):0;
+$('#fitWorld').onclick=()=>{if(!LMAP)return;FORCE_R=false;LMAP.setView([25,121],1.5)};
 $('#legend').onclick=e=>{const b=e.target.closest('button[data-cc]');if(!b||!LMAP)return;const f=GEO.f.find(x=>x.a===b.dataset.cc);
  const pts=PHOTOS.filter(p=>p.cc===b.dataset.cc&&p.lat!=null).map(p=>[p.lat,p.lon]);
  if(pts.length)LMAP.fitBounds(pts,{padding:[40,40],maxZoom:11});else if(f)LMAP.fitBounds([[f.b[1],f.b[0]],[f.b[3],f.b[2]]],{padding:[20,20]});else{const ll=GEO.m[b.dataset.cc]?.ll;if(ll)LMAP.setView(ll,5)}
  $('#mapwrap').scrollIntoView({behavior:'smooth',block:'center'})};
 /* ---------- stats ---------- */
-function renderStats(){const ALL=trips(),T=abroad(ALL),D=domestic(ALL);const cs=new Set(T.map(t=>t.cc));const cities=new Set(PHOTOS.filter(p=>p.city&&p.cc!==homeCC()).map(p=>p.cc+p.city));
+function renderStats(){const ALL=trips(),T=abroad(ALL).filter(t=>!t.transit),D=domestic(ALL);const cs=new Set(T.map(t=>t.cc));const cities=new Set(PHOTOS.filter(p=>p.city&&p.cc!==homeCC()).map(p=>p.cc+p.city));
  const days=T.reduce((s,t)=>s+t.days,0),nph=PHOTOS.filter(p=>p.th).length;
  const reg={};[...cs].forEach(c=>{const r=GEO?.m[c]?.r||'Other';reg[r]=(reg[r]||0)+1});
  const tot={};if(GEO)for(const c in GEO.m){const r=GEO.m[c].r;if(REGION[r]&&r!=='Antarctic')tot[r]=(tot[r]||0)+1}
@@ -565,7 +622,7 @@ function renderStats(){const ALL=trips(),T=abroad(ALL),D=domestic(ALL);const cs=
  <div class="card"><h2>旅行年表</h2><ul class="list">${Object.keys(yr).sort((a,b)=>b-a).map(y=>`<li><span>${y} 年</span><span>${yr[y].n} 趟 · ${yr[y].c.size} 國</span></li>`).join('')||'<li><span>還沒有紀錄</span></li>'}</ul></div>
  ${D.length?`<div class="card"><h2>國內旅遊 · ${cname(homeCC())}</h2><div class="big" style="margin:0"><div style="background:#fff"><b>${new Set(D.map(t=>t.cities[0])).size}</b><span>個地方</span></div><div style="background:#fff"><b>${D.length}</b><span>枚紀念章</span></div></div>
  <div class="legend" style="margin-top:10px">${[...new Set(D.map(t=>t.cities[0]))].map(c=>`<span>${esc(c)}</span>`).join('')}</div></div>`:''}
- <div class="card"><h2>小檔案</h2><ul class="list"><li><span>第一枚入境章</span><span>${(F=>F?esc(cname(F.cc))+' '+zdate(F.start):'—')(T.filter(t=>!t.nodate).slice(-1)[0])}</span></li><li><span>最常去</span><span>${fav?esc(cname(fav))+' '+cnt[fav]+' 次':'—'}</span></li><li><span>最長旅程</span><span>${T.length?(()=>{const l=[...T].sort((a,b)=>b.days-a.days)[0];return esc(cname(l.cc))+' '+l.days+' 天'})():'—'}</span></li><li><span>照片</span><span>${nph} 張</span></li></ul></div>`}
+ <div class="card"><h2>小檔案</h2><ul class="list"><li><span>第一枚入境章</span><span>${(F=>F?esc(cname(F.cc))+' '+zdate(F.start):'—')(T.filter(t=>!t.nodate).slice(-1)[0])}</span></li><li><span>最常去</span><span>${fav?esc(cname(fav))+' '+cnt[fav]+' 次':'—'}</span></li><li><span>最長旅程</span><span>${T.length?(()=>{const l=[...T].sort((a,b)=>b.days-a.days)[0];return esc(cname(l.cc))+' '+l.days+' 天'})():'—'}</span></li><li><span>出國旅程</span><span>${new Set(abroad(ALL).map(t=>t.jid).filter(Boolean)).size} 趟</span></li><li><span>照片</span><span>${nph} 張</span></li></ul></div>`}
 /* ---------- import ---------- */
 const busy=(on,t)=>{$('#busy').classList.toggle('on',on);if(t)$('#busyT').textContent=t};
 $('#imp').onclick=$('#imp2').onclick=()=>{unlockAudio();$('#file').click()};
@@ -759,6 +816,8 @@ let rw=innerWidth;addEventListener('resize',()=>{if((innerWidth>=700)!==(rw>=700
  {const byId=new Map(PHOTOS.map(p=>[p.id,p]));let ch=false;for(const p of [...PHOTOS]){if(!p.th&&/^m\d+e$/.test(p.id)){const base=byId.get(p.id.slice(0,-1));if(base&&base.cc===p.cc){base.tend=Math.max(base.tend||0,p.t);PHOTOS=PHOTOS.filter(x=>x!==p);ch=true}}}if(ch)save()}
  $('#title').textContent=SETTINGS.name||'我的旅行護照';$('#nameIn').value=SETTINGS.name||'';renderPass();
  try{GEO=await (await fetch('countries.json')).json();prep()}catch(e){toast('地圖資料載入失敗')}
+ {const T=trips(),keys=new Set(T.map(t=>t.key));let ch=false;for(const k of Object.keys(NOTES)){if(keys.has(k)||!NOTES[k])continue;const m=k.match(/^([A-Z]{2})-(\d+)-(\d+)-(\d+)$/);if(!m)continue;
+  const d=new Date(+m[2],m[3]-1,+m[4]).getTime(),t=T.find(t=>t.cc===m[1]&&t.visits&&t.visits.some(([a,b])=>d>=dayStart(a)&&d<=dayStart(b)));if(t){NOTES[t.key]=NOTES[t.key]?NOTES[t.key]+'\n\n'+NOTES[k]:NOTES[k];delete NOTES[k];ch=true}}if(ch)save()}
  $('#homeBox').innerHTML=picker('home',homeCC());bindPicker('home');
  $('#home').addEventListener('change',async()=>{SETTINGS.home=$('#home').value;await save();renderAll();toast(`居住地設為${cname(SETTINGS.home)}，${cname(SETTINGS.home)}不會再蓋章`)});
  $('#homeNone').onclick=async()=>{SETTINGS.home='';$('#homeq').value='';$('#home').value='';await save();renderAll();toast('已取消居住地，每個國家都會蓋章')};
