@@ -121,10 +121,20 @@ nav button.on{color:var(--gold2)}
 .legend span,.legend button{background:#fff;border:1px solid #e1e4d8;border-radius:16px;padding:6px 12px;font-size:14px;color:var(--ink);min-height:34px}
 /* stats */
 .big{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
-.big div{background:var(--paper);border-radius:12px;padding:14px}
+.big>div,.big>button{background:var(--paper);border-radius:12px;padding:14px;border:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.big>button:active,.list button:active,.bar:active{opacity:.7}
 .big b{display:block;font:700 clamp(34px,10vw,46px)/1 "Barlow Condensed",sans-serif;color:var(--navy)}
 .big span{color:var(--mute);font-size:14px}
-.bar{display:grid;grid-template-columns:5.5em 1fr 2.5em;gap:8px;align-items:center;font-size:14px;margin:7px 0}
+.bar{display:grid;grid-template-columns:5.5em 1fr 3em;gap:8px;align-items:center;font-size:14px;margin:4px 0;width:100%;border:0;background:none;padding:6px 0;color:inherit;font-family:inherit;text-align:left;min-height:36px}
+.bar.wide{grid-template-columns:8.5em 1fr 3em}.bar.wide span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;border:0;background:none;padding:2px 0;font:inherit;color:inherit;text-align:left;min-height:40px}
+.list button span:first-child{display:grid}.list small{color:var(--mute);font-size:13px;line-height:1.35}
+.list button span:last-child{white-space:nowrap;color:#374151}
+.chev{font-style:normal;color:#9ca3af;margin-left:4px}
+.dl li,.jl li{padding:6px 0}
+.jl .chk{margin:0;align-items:flex-start}.jl .chk span{display:grid}.jl .chk input{margin-top:3px;flex:none}
+.grp{font-weight:700;margin:14px 0 2px;font-size:15px}
+.meter{height:10px;border-radius:5px;background:#dfe3d5;overflow:hidden;margin:6px 0 10px}.meter em{display:block;height:100%;background:var(--gold)}
 .bar i{display:block;height:10px;border-radius:5px;background:#dfe3d5;overflow:hidden}
 .bar i em{display:block;height:100%;background:var(--gold)}
 .bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
@@ -238,7 +248,7 @@ textarea{min-height:120px;resize:vertical}
 <section class="view" id="v-map">
 <div class="card"><h2 id="mapTitle">足跡地圖</h2>
 <div class="mapwrap" id="mapwrap"></div>
-<div class="maphint" id="mapHint">兩指縮放可以放大到城市和街道，點紅點看那裡的照片。</div><div class="zoom"><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
+<div class="maphint" id="mapHint">兩指縮放可以放大到城市和街道，點紅點看那裡的照片。</div><div class="zoom"><button class="chip" id="routeBtn">✈︎ 飛行路線</button><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
 <div class="legend" id="legend"></div></div>
 </section>
 <section class="view" id="v-stats"><div id="stats"></div></section>
@@ -470,7 +480,7 @@ document.addEventListener('keydown',e=>{if(!$('#v-pass').classList.contains('on'
  const end=()=>{if(x0==null)return;x0=null;if(!drag)return;JUSTDRAG=true;setTimeout(()=>JUSTDRAG=false,350);const f=drag>0?-FA/180:(FA+180)/180;drag=0;finishFlip(f>.3)};
  fl.addEventListener('touchend',end);fl.addEventListener('touchcancel',end)}
 /* ---------- trip sheet ---------- */
-function openTrip(key){const t=trips().find(x=>x.key===key);if(!t)return;
+function openTrip(key,back){const t=trips().find(x=>x.key===key);if(!t)return;$('#sheetBody').onclick=null;
  const ph=t.photos.filter(p=>p.th);
  sheet(`<div style="display:flex;gap:12px;align-items:center"><div style="width:84px;flex:none">${stampSVG(t,uid++)}</div><div><h3>${esc(tname(t))}</h3><div class="sub">${t.domestic?esc(cname(t.cc))+' · ':''}${tdate(t)}${!t.domestic&&t.cities.length?' · '+esc(t.cities.join('、')):''}</div></div></div>
  ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><div class="photos">${ph.map((p,i)=>`<img src="${p.th}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章是手動新增的，沒有照片。</div>'}
@@ -478,7 +488,7 @@ function openTrip(key){const t=trips().find(x=>x.key===key);if(!t)return;
  ${t.journey?`<div class="row" style="gap:8px">${t.journey.route.length>1||t.journey.homePts?`<button class="btn alt" id="showRoute">✈︎ 在地圖看路線</button>`:''}<button class="btn alt" id="trToggle">${t.transit?'改成一般入境章':'標記為過境／轉機'}</button></div>`:''}
  <label for="city">城市（可修改）</label><input id="city" value="${esc(t.cities.join('、'))}" placeholder="例如：京都、大阪">
  <label for="diary">旅程日記</label><textarea id="diary" placeholder="寫下這趟旅行的心得、吃了什麼、遇到誰…">${esc(NOTES[key]||'')}</textarea>
- <button class="btn" id="saveTrip">儲存</button><button class="btn alt" id="editTrip">修改這枚章的國家${ph.length?'':'／日期'}</button><button class="btn danger" id="delTrip">刪除這枚${t.domestic?'紀念章':'入境章'}</button>`);
+ <button class="btn" id="saveTrip">儲存</button><button class="btn alt" id="editTrip">修改這枚章的國家${ph.length?'':'／日期'}</button><button class="btn danger" id="delTrip">刪除這枚${t.domestic?'紀念章':'入境章'}</button>`,back);
  $('#editTrip').onclick=()=>editTrip(t);
  const tb=$('#trToggle');if(tb)tb.onclick=async()=>{const v=!t.transit;SETTINGS.transit=SETTINGS.transit||{};if(v===t.autoTransit)delete SETTINGS.transit[key];else SETTINGS.transit[key]=v;await save();renderAll();openTrip(key);toast(v?`${cname(t.cc)}標記為過境，不算進去過的國家`:`${cname(t.cc)}改成一般入境章`)};
  const sr=$('#showRoute');if(sr)sr.onclick=()=>{FOCUS_J=t.jid;closeSheet();go('map')};
@@ -495,7 +505,7 @@ function viewer(list,i,key){const v=$('#viewer'),img=$('#vImg'),cnt=$('#vCnt');l
  v.ontouchstart=e=>{x0=e.touches[0].clientX};v.ontouchend=e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50){i+=dx<0?1:-1;show()}};
  document.onkeydown=e=>{if(!v.classList.contains('on'))return;if(e.key==='ArrowLeft'){i--;show()}else if(e.key==='ArrowRight'){i++;show()}else if(e.key==='Escape')v.classList.remove('on')}}
 let DISMISS=null,DIRTY=false,DARMED=false;
-function sheet(html,onDismiss){$('#sheetBody').innerHTML=html;DISMISS=onDismiss||null;DIRTY=false;DARMED=false;const sh=$('#sheet');sh.style.transform='';$('#scrim').classList.add('on');sh.classList.add('on');sh.scrollTop=0}
+function sheet(html,onDismiss){const sb=$('#sheetBody');sb.onclick=null;sb.onchange=null;sb.innerHTML=html;DISMISS=onDismiss||null;DIRTY=false;DARMED=false;const sh=$('#sheet');sh.style.transform='';$('#scrim').classList.add('on');sh.classList.add('on');sh.scrollTop=0}
 function closeSheet(){const sh=$('#sheet');sh.style.transition='';sh.style.transform='';$('#scrim').classList.remove('on');sh.classList.remove('on');DISMISS=null}
 function dismissSheet(){if(DIRTY&&!DARMED){DARMED=true;toast('有修改還沒儲存，再往下滑一次會放棄修改');return false}const f=DISMISS;closeSheet();if(f)f();return true}
 $('#sheetBody').addEventListener('input',e=>{if(!e.target.closest('.cp'))DIRTY=true});
@@ -570,7 +580,8 @@ function arc(a,b){let [y1,x1]=a,[y2,x2]=b;if(Math.abs(x2-x1)>180)x2+=x2<x1?360:-
  return{pts,mid:pts[14],ang:Math.atan2(-(y2-y1),x2-x1)*180/Math.PI}}
 function buildRoutes(T,groups){if(!LMAP)return;FORCE_R=!!FOCUS_J;if(LROUTE)LROUTE.remove();LROUTE=L.layerGroup();ROUTE_B={};const H=homeCC(),hll=H&&GEO.m[H]?.ll;
  const js=[...new Map(abroad(T).filter(t=>t.journey).map(t=>[t.jid,t.journey])).values()];
- for(const jo of js){const pts=[];const home=jo.homePts&&jo.homePts.length?[jo.homePts.reduce((a,p)=>a+p[0],0)/jo.homePts.length,jo.homePts.reduce((a,p)=>a+p[1],0)/jo.homePts.length]:hll?[hll[0],hll[1]]:null;
+ const HID=SETTINGS.hideJ||{};
+ for(const jo of js){if(HID[jo.id]&&FOCUS_J!==jo.id)continue;const pts=[];const home=jo.homePts&&jo.homePts.length?[jo.homePts.reduce((a,p)=>a+p[0],0)/jo.homePts.length,jo.homePts.reduce((a,p)=>a+p[1],0)/jo.homePts.length]:hll?[hll[0],hll[1]]:null;
   if(home)pts.push({p:home,home:1});for(const r of jo.route){const q=segPoint(r.seg);if(q)pts.push({p:q,tr:r.seg.stamp?.transit,cc:r.seg.cc})}if(home)pts.push({p:home,home:1});
   if(pts.length<2)continue;const on=FOCUS_J===jo.id,col=on?'#b42335':'#8a6a1f';const all=[];
   for(let i=1;i<pts.length;i++){const A=arc(pts[i-1].p,pts[i].p);all.push(...A.pts);
@@ -580,7 +591,7 @@ function buildRoutes(T,groups){if(!LMAP)return;FORCE_R=!!FOCUS_J;if(LROUTE)LROUT
   ROUTE_B[jo.id]=all}
  showRoutes();
  if(FOCUS_J&&ROUTE_B[FOCUS_J]){const b=ROUTE_B[FOCUS_J];FOCUS_J=null;LFIT=true;setTimeout(()=>{LMAP.fitBounds(b,{padding:[30,30],maxZoom:7});$('#mapwrap').scrollIntoView({block:'center'})},120)}}
-function showRoutes(){if(!LMAP||!LROUTE)return;const z=LMAP.getZoom(),want=z>=ROUTE_Z||FORCE_R;if(want&&!LMAP.hasLayer(LROUTE))LROUTE.addTo(LMAP);else if(!want&&LMAP.hasLayer(LROUTE))LROUTE.remove()}
+function showRoutes(){if(!LMAP||!LROUTE)return;const z=LMAP.getZoom(),want=z>=ROUTE_Z||FORCE_R||!!SETTINGS.routesAlways;if(want&&!LMAP.hasLayer(LROUTE))LROUTE.addTo(LMAP);else if(!want&&LMAP.hasLayer(LROUTE))LROUTE.remove()}
 async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T).filter(t=>!t.transit).forEach(t=>vis[t.cc]=(vis[t.cc]||0)+1);const nd=new Set(domestic(T).map(t=>t.cities[0])).size;
  $('#mapTitle').textContent=`足跡地圖 · ${Object.keys(vis).length} 個國家${nd?` · 國內 ${nd} 個地方`:''}`;
  $('#legend').innerHTML=Object.keys(vis).sort((a,b)=>vis[b]-vis[a]).map(a=>`<button data-cc="${a}">${GEO.m[a]?.f||''} ${esc(cname(a))}${vis[a]>1?' ×'+vis[a]:''}</button>`).join('')||'<span>還沒有足跡，匯入照片開始吧</span>';
@@ -605,6 +616,13 @@ async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T)
  setTimeout(()=>{LMAP.invalidateSize();if(!LFIT){LFIT=true;fitAll()}},60)}
 function fitAll(){if(!LMAP)return;if(LPTS.length)LMAP.fitBounds(LPTS,{padding:[36,36],maxZoom:10});else LMAP.setView([25,121],2)}
 $('#fitAll').onclick=fitAll;
+$('#routeBtn').onclick=()=>{const J=journeys(trips()),HID=SETTINGS.hideJ||{};
+ sheet(`<h3>飛行路線</h3><div class="sub">選擇要在地圖上顯示哪幾趟旅程的航線</div>
+ <label class="chk"><input type="checkbox" id="rAlways" ${SETTINGS.routesAlways?'checked':''}> 縮小到整個世界時也顯示</label>
+ <div class="row" style="gap:8px"><button class="btn alt" id="rAll">全部開啟</button><button class="btn alt" id="rNone">全部關閉</button></div>
+ <ul class="list jl">${J.map(jo=>`<li><label class="chk"><input type="checkbox" data-j="${jo.id}" ${HID[jo.id]?'':'checked'}><span>${jdate(jo)}<small>${jname(jo)}</small></span></label></li>`).join('')||'<li><span>還沒有出國旅程</span></li>'}</ul>`);
+ const apply=async()=>{const H={};$$('#sheetBody [data-j]').forEach(c=>{if(!c.checked)H[c.dataset.j]=true});SETTINGS.hideJ=H;SETTINGS.routesAlways=$('#rAlways').checked;await save();DIRTY=false;if(LMAP)buildRoutes(trips())};
+ $('#sheetBody').onchange=apply;$('#rAll').onclick=()=>{$$('#sheetBody [data-j]').forEach(c=>c.checked=true);apply()};$('#rNone').onclick=()=>{$$('#sheetBody [data-j]').forEach(c=>c.checked=false);apply()}};
 $('#fitWorld').onclick=()=>{if(!LMAP)return;FORCE_R=false;LMAP.setView([25,121],1.5)};
 $('#legend').onclick=e=>{const b=e.target.closest('button[data-cc]');if(!b||!LMAP)return;const f=GEO.f.find(x=>x.a===b.dataset.cc);
  const pts=PHOTOS.filter(p=>p.cc===b.dataset.cc&&p.lat!=null).map(p=>[p.lat,p.lon]);
@@ -615,14 +633,49 @@ function renderStats(){const ALL=trips(),T=abroad(ALL).filter(t=>!t.transit),D=d
  const days=T.reduce((s,t)=>s+t.days,0),nph=PHOTOS.filter(p=>p.th).length;
  const reg={};[...cs].forEach(c=>{const r=GEO?.m[c]?.r||'Other';reg[r]=(reg[r]||0)+1});
  const tot={};if(GEO)for(const c in GEO.m){const r=GEO.m[c].r;if(REGION[r]&&r!=='Antarctic')tot[r]=(tot[r]||0)+1}
- const yr={};T.filter(t=>!t.nodate).forEach(t=>{const y=new Date(t.start).getFullYear();(yr[y]=yr[y]||{n:0,c:new Set()}).n++;yr[y].c.add(t.cc)});
+ const yr={};[...T,...D].filter(t=>!t.nodate).forEach(t=>{const y=new Date(t.start).getFullYear();(yr[y]=yr[y]||{n:0,c:new Set(),d:0});if(t.domestic)yr[y].d++;else{yr[y].n++;yr[y].c.add(t.cc)}});
  const cnt={};T.forEach(t=>cnt[t.cc]=(cnt[t.cc]||0)+1);const fav=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
- $('#stats').innerHTML=`<div class="big"><div><b>${cs.size}</b><span>國家／地區 · 世界的 ${Math.round(cs.size/195*100)}%</span></div><div><b>${cities.size}</b><span>城市</span></div><div><b>${T.length}</b><span>枚入境章</span></div><div><b>${days}</b><span>旅行天數</span></div></div>
- <div class="card"><h2>各大洲 · 去過 ${Object.keys(reg).filter(r=>REGION[r]).length} / 5</h2>${Object.keys(tot).map(r=>`<div class="bar"><span>${REGION[r]}</span><i><em style="width:${Math.round((reg[r]||0)/tot[r]*100)}%"></em></i><span>${reg[r]||0}</span></div>`).join('')}</div>
- <div class="card"><h2>旅行年表</h2><ul class="list">${Object.keys(yr).sort((a,b)=>b-a).map(y=>`<li><span>${y} 年</span><span>${yr[y].n} 趟 · ${yr[y].c.size} 國</span></li>`).join('')||'<li><span>還沒有紀錄</span></li>'}</ul></div>
- ${D.length?`<div class="card"><h2>國內旅遊 · ${cname(homeCC())}</h2><div class="big" style="margin:0"><div style="background:#fff"><b>${new Set(D.map(t=>t.cities[0])).size}</b><span>個地方</span></div><div style="background:#fff"><b>${D.length}</b><span>枚紀念章</span></div></div>
- <div class="legend" style="margin-top:10px">${[...new Set(D.map(t=>t.cities[0]))].map(c=>`<span>${esc(c)}</span>`).join('')}</div></div>`:''}
- <div class="card"><h2>小檔案</h2><ul class="list"><li><span>第一枚入境章</span><span>${(F=>F?esc(cname(F.cc))+' '+zdate(F.start):'—')(T.filter(t=>!t.nodate).slice(-1)[0])}</span></li><li><span>最常去</span><span>${fav?esc(cname(fav))+' '+cnt[fav]+' 次':'—'}</span></li><li><span>最長旅程</span><span>${T.length?(()=>{const l=[...T].sort((a,b)=>b.days-a.days)[0];return esc(cname(l.cc))+' '+l.days+' 天'})():'—'}</span></li><li><span>出國旅程</span><span>${new Set(abroad(ALL).map(t=>t.jid).filter(Boolean)).size} 趟</span></li><li><span>照片</span><span>${nph} 張</span></li></ul></div>`}
+ const first=T.filter(t=>!t.nodate).slice(-1)[0],longest=[...T].sort((a,b)=>b.days-a.days)[0],nJ=journeys(ALL).length;
+ const R=(act,l,r,arg='')=>`<li><button data-act="${act}" data-arg="${esc(arg)}"><span>${l}</span><span>${r} <i class="chev">›</i></span></button></li>`;
+ $('#stats').innerHTML=`<div class="big"><button data-act="countries"><b>${cs.size}</b><span>國家／地區 · 世界的 ${Math.round(cs.size/195*100)}% ›</span></button><button data-act="cities"><b>${cities.size}</b><span>城市 ›</span></button><button data-act="stamps"><b>${T.length}</b><span>枚入境章 ›</span></button><button data-act="days"><b>${days}</b><span>旅行天數 ›</span></button></div>
+ <div class="card"><h2>各大洲 · 去過 ${Object.keys(reg).filter(r=>REGION[r]).length} / 5</h2>${Object.keys(tot).map(r=>`<button class="bar" data-act="region" data-arg="${r}"><span>${REGION[r]}</span><i><em style="width:${Math.round((reg[r]||0)/tot[r]*100)}%"></em></i><span>${reg[r]||0} ›</span></button>`).join('')}</div>
+ <div class="card"><h2>旅行年表</h2><ul class="list">${Object.keys(yr).sort((a,b)=>b-a).map(y=>R('year',y+' 年',`${yr[y].n?yr[y].n+' 枚章 · '+yr[y].c.size+' 國':''}${yr[y].n&&yr[y].d?' · ':''}${yr[y].d?'國內 '+yr[y].d:''}`,y)).join('')||'<li><span>還沒有紀錄</span></li>'}</ul></div>
+ ${D.length?`<div class="card"><h2>國內旅遊 · ${cname(homeCC())}</h2><div class="big" style="margin:0"><button data-act="domestic" style="background:#fff"><b>${new Set(D.map(t=>t.cities[0])).size}</b><span>個地方 ›</span></button><button data-act="domestic" style="background:#fff"><b>${D.length}</b><span>枚紀念章 ›</span></button></div></div>`:''}
+ <div class="card"><h2>小檔案</h2><ul class="list">${R('trip','第一枚入境章',first?esc(cname(first.cc))+' '+zdate(first.start):'—',first?.key||'')}${R('country','最常去',fav?esc(cname(fav))+' '+cnt[fav]+' 次':'—',fav||'')}${R('trip','最長的一枚章',longest?esc(cname(longest.cc))+' '+longest.days+' 天':'—',longest?.key||'')}${R('journeys','出國旅程',nJ+' 趟')}<li><span>照片</span><span>${nph} 張</span></li></ul></div>`}
+const journeys=ALL=>[...new Map(abroad(ALL).filter(t=>t.journey).map(t=>[t.jid,t.journey])).values()].sort((a,b)=>b.start-a.start);
+const jname=jo=>jo.route.map(r=>esc(cname(r.seg.cc))+(r.seg.stamp?.transit?'（過境）':'')).join(' → ');
+const jdate=jo=>zdate(jo.start)+(dayStart(jo.end)>dayStart(jo.start)?' – '+zdate(jo.end):'');
+const flagOf=cc=>GEO?.m[cc]?.f||'';
+const rowB=(attrs,l,r)=>`<li><button ${attrs}><span>${l}</span><span>${r} <i class="chev">›</i></span></button></li>`;
+function statsSheet(act,arg){const ALL=trips(),AB=abroad(ALL),T=AB.filter(t=>!t.transit),D=domestic(ALL),back=()=>statsSheet(act,arg);let h='';
+ const bycc={};T.forEach(t=>{const o=bycc[t.cc]=bycc[t.cc]||{n:0,d:0,last:0,cities:new Set()};o.n++;o.d+=t.days;o.last=Math.max(o.last,t.start);t.cities.forEach(c=>o.cities.add(c))});
+ const stampRow=t=>rowB(`data-trip="${esc(t.key)}"`,`${t.domestic?'🏞️':flagOf(t.cc)} ${esc(tname(t))}${t.transit?'（過境）':''}`,t.nodate?'日期未填':zdate(t.start));
+ if(act==='countries'){const L=Object.keys(bycc).sort((a,b)=>bycc[b].n-bycc[a].n||bycc[b].d-bycc[a].d);
+  h=`<h3>去過的國家 · ${L.length} 個</h3><div class="sub">依去的次數排列，點國家看每一次的入境章</div><ul class="list dl">${L.map(c=>rowB(`data-cc="${c}"`,`${flagOf(c)} ${esc(cname(c))}`,`${bycc[c].n} 次 · ${bycc[c].d} 天`)).join('')}</ul>`}
+ else if(act==='cities'){const by={};T.forEach(t=>t.photos.forEach(p=>{if(!p.city||p.cc===homeCC())return;const k=p.cc+'|'+p.city;(by[k]=by[k]||{cc:p.cc,city:p.city,n:0,t:null}).n+=p.th?1:0;by[k].t=by[k].t&&by[k].t.start>t.start?by[k].t:t}));
+  const ccs=[...new Set(Object.values(by).map(x=>x.cc))];
+  h=`<h3>去過的城市 · ${Object.keys(by).length} 個</h3>${ccs.map(c=>`<div class="grp">${flagOf(c)} ${esc(cname(c))}</div><ul class="list dl">${Object.values(by).filter(x=>x.cc===c).map(x=>rowB(`data-trip="${esc(x.t.key)}"`,esc(x.city),x.n?x.n+' 張照片':'')).join('')}</ul>`).join('')||'<div class="sub">還沒有城市資料</div>'}`}
+ else if(act==='stamps'){h=`<h3>全部入境章 · ${AB.length} 枚</h3><div class="sub">過境章不算在統計的數字裡</div><ul class="list dl">${AB.map(stampRow).join('')}</ul>`}
+ else if(act==='days'){const L=Object.keys(bycc).sort((a,b)=>bycc[b].d-bycc[a].d),mx=Math.max(1,...L.map(c=>bycc[c].d));
+  h=`<h3>旅行天數 · ${T.reduce((s,t)=>s+t.days,0)} 天</h3><div class="sub">每個國家待了幾天</div>${L.map(c=>`<button class="bar wide" data-cc="${c}"><span>${flagOf(c)} ${esc(cname(c))}</span><i><em style="width:${Math.round(bycc[c].d/mx*100)}%"></em></i><span>${bycc[c].d} ›</span></button>`).join('')}
+  <div class="grp">每一趟</div><ul class="list dl">${journeys(ALL).map(jo=>rowB(`data-jid="${jo.id}"`,`${jdate(jo)}<small>${jname(jo)}</small>`,Math.round((dayStart(jo.end)-dayStart(jo.start))/DAY)+1+' 天')).join('')}</ul>`}
+ else if(act==='region'){const all=Object.keys(GEO.m).filter(c=>GEO.m[c].r===arg),vis=all.filter(c=>bycc[c]).sort((a,b)=>bycc[b].n-bycc[a].n),not=all.filter(c=>!bycc[c]).map(c=>cname(c)).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+  h=`<h3>${REGION[arg]} · 去過 ${vis.length} / ${all.length}</h3><div class="meter"><em style="width:${Math.round(vis.length/all.length*100)}%"></em></div>
+  ${vis.length?`<ul class="list dl">${vis.map(c=>rowB(`data-cc="${c}"`,`${flagOf(c)} ${esc(cname(c))}`,`${bycc[c].n} 次 · ${bycc[c].d} 天`)).join('')}</ul>`:`<div class="sub">還沒去過${REGION[arg]}的國家</div>`}
+  <details class="bulk"><summary>還沒去過的 ${not.length} 個</summary><div class="legend">${not.map(n=>`<span>${esc(n)}</span>`).join('')}</div></details>`}
+ else if(act==='year'){const L=[...AB,...D].filter(t=>!t.nodate&&new Date(t.start).getFullYear()==arg);
+  h=`<h3>${arg} 年</h3><div class="sub">${L.filter(t=>!t.domestic&&!t.transit).length} 枚入境章 · ${new Set(L.filter(t=>!t.domestic&&!t.transit).map(t=>t.cc)).size} 個國家${L.some(t=>t.domestic)?' · 國內 '+L.filter(t=>t.domestic).length+' 個地方':''}</div><ul class="list dl">${L.map(stampRow).join('')}</ul>`}
+ else if(act==='journeys'){const J=journeys(ALL);h=`<h3>出國旅程 · ${J.length} 趟</h3><div class="sub">從離開${homeCC()?cname(homeCC()):'家'}到回來算一趟</div><ul class="list dl">${J.map(jo=>rowB(`data-jid="${jo.id}"`,`${jdate(jo)}<small>${jname(jo)}</small>`,Math.round((dayStart(jo.end)-dayStart(jo.start))/DAY)+1+' 天')).join('')}</ul>`}
+ else if(act==='journey'){const jo=journeys(ALL).find(x=>x.id===arg);if(!jo)return;const st=[...new Set(jo.route.map(r=>r.seg.stamp))];
+  h=`<h3>${jdate(jo)}</h3><div class="route"><span>路線</span>${jname(jo)}</div><button class="btn alt" data-route="${jo.id}">✈︎ 在地圖看路線</button><ul class="list dl">${st.map(stampRow).join('')}</ul>`}
+ else if(act==='domestic'){const by={};D.forEach(t=>{const c=t.cities[0];(by[c]=by[c]||[]).push(t)});
+  h=`<h3>國內旅遊 · ${Object.keys(by).length} 個地方</h3><ul class="list dl">${Object.keys(by).map(c=>rowB(`data-trip="${esc(by[c][0].key)}"`,`🏞️ ${esc(c)}`,`${by[c].length} 次 · ${by[c][0].nodate?'日期未填':zdate(by[c][0].start)}`)).join('')}</ul>`}
+ else if(act==='country'){const L=AB.filter(t=>t.cc===arg),o=bycc[arg];
+  h=`<h3>${flagOf(arg)} ${esc(cname(arg))}</h3><div class="sub">${o?o.n+' 次 · 共 '+o.d+' 天':'只有過境'}</div>${o&&o.cities.size?`<div class="legend">${[...o.cities].map(c=>`<span>${esc(c)}</span>`).join('')}</div>`:''}<ul class="list dl" style="margin-top:8px">${L.map(stampRow).join('')}</ul>`}
+ sheet(h);
+ $('#sheetBody').onclick=e=>{const b=e.target.closest('[data-trip],[data-cc],[data-jid],[data-route]');if(!b)return;$('#sheetBody').onclick=null;
+  if(b.dataset.trip)openTrip(b.dataset.trip,back);else if(b.dataset.cc)statsSheet('country',b.dataset.cc);else if(b.dataset.jid)statsSheet('journey',b.dataset.jid);else{FOCUS_J=b.dataset.route;closeSheet();go('map')}}}
+$('#stats').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,g=b.dataset.arg;if(a==='trip'){if(g)openTrip(g)}else if(a==='country'){if(g)statsSheet('country',g)}else statsSheet(a,g)};
 /* ---------- import ---------- */
 const busy=(on,t)=>{$('#busy').classList.toggle('on',on);if(t)$('#busyT').textContent=t};
 $('#imp').onclick=$('#imp2').onclick=()=>{unlockAudio();$('#file').click()};
