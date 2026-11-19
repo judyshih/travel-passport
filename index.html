@@ -12,8 +12,15 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
 <title>旅行護照</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+<!-- 安全性：只允許載入 App 自己的程式；網路只連到地圖圖磚、地名查詢兩個服務 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self' https://api.bigdatacloud.net https://nominatim.openstreetmap.org; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>
+@font-face{font-family:"Barlow Condensed";font-weight:500;font-display:swap;src:url(fonts/barlow-condensed-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:600;font-display:swap;src:url(fonts/barlow-condensed-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Cormorant Garamond";font-weight:600;font-display:swap;src:url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2")}
+</style>
 <style>
 /* VOICE: a real passport — Taiwan-passport green cover, gold foil, guilloche paper, inked stamps
    IDEA: the app *is* the passport booklet; every trip becomes an entry stamp on a visa page
@@ -193,11 +200,11 @@ textarea{min-height:120px;resize:vertical}
  display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:11% 8% 9%;color:#d8b866;text-align:center;overflow:hidden}
 .twc::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.018) 0 2px,transparent 2px 5px);pointer-events:none}
 .twc .foil{background:linear-gradient(180deg,#f1d98f,#c79d45 55%,#e8cb7a);-webkit-background-clip:text;background-clip:text;color:transparent}
-.twc .cn{font:700 clamp(26px,9cqw,40px)/1.1 "Noto Serif TC","Songti TC","PMingLiU",serif;letter-spacing:.32em;margin-right:-.32em}
-.twc .en{font:600 clamp(10px,3.4cqw,15px)/1.4 "Cormorant Garamond",serif;letter-spacing:.28em;margin-top:6px}
-.twc .tw{font:600 clamp(24px,8cqw,36px)/1 "Cormorant Garamond",serif;letter-spacing:.34em;margin-right:-.34em}
-.twc .pp{font:700 clamp(20px,6.5cqw,30px)/1.2 "Noto Serif TC","Songti TC",serif;letter-spacing:.5em;margin-right:-.5em}
-.twc .pe{font:600 clamp(11px,3.6cqw,16px)/1 "Cormorant Garamond",serif;letter-spacing:.42em;margin-top:6px}
+.twc .cn{font:700 clamp(12px,9cqw,40px)/1.1 "Noto Serif TC","Songti TC","PMingLiU",serif;letter-spacing:.32em;margin-right:-.32em}
+.twc .en{font:600 clamp(6px,3.4cqw,15px)/1.4 "Cormorant Garamond",serif;letter-spacing:.28em;margin-top:6px}
+.twc .tw{font:600 clamp(11px,8cqw,36px)/1 "Cormorant Garamond",serif;letter-spacing:.34em;margin-right:-.34em}
+.twc .pp{font:700 clamp(9px,6.5cqw,30px)/1.2 "Noto Serif TC","Songti TC",serif;letter-spacing:.5em;margin-right:-.5em}
+.twc .pe{font:600 clamp(6px,3.6cqw,16px)/1 "Cormorant Garamond",serif;letter-spacing:.42em;margin-top:6px}
 .twc .emb{width:44%;color:#d8b866;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
 .twc .echip{width:13%;color:#d8b866}
 .twc-wrap{container-type:inline-size;position:absolute;inset:0}
@@ -228,7 +235,7 @@ textarea{min-height:120px;resize:vertical}
 @media (min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.view{padding-inline:max(14px,calc(50% - 360px))}}
 #fpL,#fpLU{display:none}
 /* ---- wide screens: Galaxy Fold opened, iPad ---- */
-@media (min-width:760px) and (min-height:540px){
+@media (min-width:760px) and (min-height:540px), (orientation:landscape) and (min-width:600px) and (max-height:539px){
  .view{padding-inline:max(16px,calc(50% - 580px))}
  .flip{height:clamp(460px,calc(100vh - 220px),780px);perspective:2600px}
  .flip.wide .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -253,6 +260,32 @@ textarea{min-height:120px;resize:vertical}
  .ggrid{grid-template-columns:repeat(6,minmax(0,1fr))}
  .photos{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
+/* ---- phone turned sideways: menu on the left, one-line title, the open passport fills the height ---- */
+@media (orientation:landscape) and (min-width:600px) and (max-height:539px){
+ #app{grid-template-columns:calc(68px + env(safe-area-inset-left)) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+ header{grid-column:2;grid-row:1;padding:6px calc(12px + env(safe-area-inset-right)) 4px 12px}
+ header small{display:none}header h1{font-size:19px}
+ .addbtn{height:36px;font-size:14px;padding:0 12px 0 9px}.icon-btn{width:36px;height:36px}
+ main{grid-column:2;grid-row:2}
+ nav{grid-column:1;grid-row:1 / 3;display:flex;flex-direction:column;justify-content:center;gap:6px;border-top:0;border-right:1px solid #2a4d3e;padding:0 0 0 env(safe-area-inset-left)}
+ nav button{min-height:58px}
+ .view{padding:0 calc(12px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) 12px}
+ .flip{height:calc(100vh - 100px - env(safe-area-inset-bottom));min-height:220px}
+ .flipnav{margin:4px 0 2px}.flipnav button{height:30px}
+ .flip.wide .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0 4px}
+ .page{padding:7px 10px 18px}.page-h{font-size:11px;padding-bottom:3px;margin-bottom:2px}.page-n{bottom:3px;font-size:11px}
+ .stamp{padding:1px}
+ .flip.wide .cover-page .twc-box{width:min(100%,calc((100vh - 110px)*.7))}
+ .cover-hint{display:none}
+ #lmap{height:calc(100vh - 120px);min-height:0}
+ #v-map .card{padding:10px}#v-map .legend{max-height:calc(100vh - 290px)}
+ .sheet{max-height:92vh}
+ #cer{justify-items:start;padding-left:calc(8% + env(safe-area-inset-left))}
+ .book{width:calc((100vh - 70px)*.7)}
+ .cer-cap{left:auto;right:calc(4% + env(safe-area-inset-right));width:42%;top:50%;bottom:auto;transform:translateY(-50%)}
+ .cer-h{top:10px}
+}
+
 </style>
 </head>
 <body>
@@ -334,6 +367,18 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 <script>
 {
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const safeImg=v=>typeof v==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)?v:'';
+const num=(v,lo,hi)=>typeof v==='number'&&isFinite(v)&&v>=lo&&v<=hi?v:null;
+const str=(v,max)=>typeof v==='string'?v.replace(/[<>\u0000-\u001f]/g,'').slice(0,max):'';
+/* every record is rebuilt field by field from known types: anything else in a backup is dropped */
+function cleanPhoto(p){if(!p||typeof p!=='object'||typeof p.id!=='string'||!p.id)return null;const t=num(p.t,0,4102444800000);if(t===null)return null;
+ const o={id:p.id.slice(0,200),t,lat:num(p.lat,-90,90),lon:num(p.lon,-180,180),cc:typeof p.cc==='string'&&/^[A-Z]{2}$/.test(p.cc)?p.cc:null,city:str(p.city,80),th:safeImg(p.th)};
+ if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;return o}
+function cleanNotes(n){const o={};if(n&&typeof n==='object')for(const k of Object.keys(n).slice(0,5000))if(typeof n[k]==='string')o[str(k,200)]=n[k].slice(0,20000);return o}
+function cleanSettings(x){const o={};if(!x||typeof x!=='object')return o;if(typeof x.name==='string')o.name=str(x.name,60);
+ if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;
+ const flags=(v,onlyTrue)=>{const r={};if(v&&typeof v==='object')for(const k of Object.keys(v).slice(0,2000))if(typeof v[k]==='boolean'&&(!onlyTrue||v[k]))r[str(k,120)]=v[k];return r};
+ if(x.transit)o.transit=flags(x.transit);if(x.hideJ)o.hideJ=flags(x.hideJ,true);return o}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DAY=864e5, GAP=4*DAY;
 let GEO=null, PHOTOS=[], NOTES={}, NAMES={}, SETTINGS={};
@@ -376,7 +421,7 @@ function countryAt(lat,lon){if(!GEO)return null;for(const f of GEO.f){const b=f.
 const GC={};
 async function geocode(lat,lon){const k=lat.toFixed(2)+','+lon.toFixed(2);if(GC[k])return GC[k];
  const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),7000);
- try{const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-Hant`,{signal:ctl.signal});const j=await r.json();
+ try{const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&localityLanguage=zh-Hant`,{signal:ctl.signal});const j=await r.json();
   return GC[k]={cc:j.countryCode||null,city:j.city||j.locality||j.principalSubdivision||''}}catch(e){return GC[k]={cc:null,city:''}}finally{clearTimeout(to)}}
 /* ---------- thumbnails ---------- */
 async function thumb(file,max=420){let src;try{src=await createImageBitmap(file)}catch(e){src=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file)}).catch(()=>null)}
@@ -492,7 +537,7 @@ function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const per=WIDEQ.
 /* ---------- page turning like a real book ---------- */
 let PAGES=[],PKEYS=[],PIDX=0,UNITS=[],UIDX=0,FLIPPING=false,JUSTDRAG=false,FDIR=0,FA=0;
 /* wide screens (Fold opened, iPad): the passport lies open — two pages side by side, cover alone on the right */
-const WIDEQ=matchMedia('(min-width: 760px) and (min-height: 540px)');
+const WIDEQ=matchMedia('(min-width: 760px) and (min-height: 540px), (orientation: landscape) and (min-width: 600px) and (max-height: 539px)');
 const BLANK='<div class="page paper"></div>';
 function buildUnits(){const W=WIDEQ.matches;$('#flip').classList.toggle('wide',W);
  if(!W)UNITS=PAGES.map((p,k)=>({R:p,i:[k]}));else{UNITS=[{L:null,R:PAGES[0],i:[0]}];for(let k=1;k<PAGES.length;k+=2)UNITS.push({L:PAGES[k],R:PAGES[k+1]||BLANK,i:PAGES[k+1]?[k,k+1]:[k]})}}
@@ -529,7 +574,7 @@ document.addEventListener('keydown',e=>{if(!$('#v-pass').classList.contains('on'
 function openTrip(key,back){const t=trips().find(x=>x.key===key);if(!t)return;$('#sheetBody').onclick=null;
  const ph=t.photos.filter(p=>p.th);
  sheet(`<div style="display:flex;gap:12px;align-items:center"><div style="width:84px;flex:none">${stampSVG(t,uid++)}</div><div><h3>${esc(tname(t))}</h3><div class="sub">${t.domestic?esc(cname(t.cc))+' · ':''}${tdate(t)}${!t.domestic&&t.cities.length?' · '+esc(t.cities.join('、')):''}</div></div></div>
- ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><div class="photos">${ph.map((p,i)=>`<img src="${p.th}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章是手動新增的，沒有照片。</div>'}
+ ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><div class="photos">${ph.map((p,i)=>`<img src="${esc(safeImg(p.th))}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章是手動新增的，沒有照片。</div>'}
  ${t.journey&&t.journey.route.length>1?`<div class="route"><span>這趟旅程</span>${routeText(t)}</div>`:''}
  ${t.journey?`<div class="row" style="gap:8px">${t.journey.route.length>1||t.journey.homePts?`<button class="btn alt" id="showRoute">✈︎ 在地圖看路線</button>`:''}<button class="btn alt" id="trToggle">${t.transit?'改成一般入境章':'標記為過境／轉機'}</button></div>`:''}
  <label for="city">城市（可修改）</label><input id="city" value="${esc(t.cities.join('、'))}" placeholder="例如：京都、大阪">
@@ -576,9 +621,9 @@ function renderSvgMap(){if(!GEO)return;const T=trips();const vis={};T.forEach(t=
  $('#mapTitle').textContent=`足跡地圖 · ${Object.keys(vis).length} 個國家`;
  $('#legend').innerHTML=Object.keys(vis).sort((a,b)=>vis[b]-vis[a]).map(a=>`<span>${GEO.m[a]?.f||''} ${esc(cname(a))}${vis[a]>1?' ×'+vis[a]:''}</span>`).join('')||'<span>還沒有足跡，匯入照片開始吧</span>'}
 let LMAP=null,LLAYER=null,LFIT=false,LPTS=[],LC=[],LCITY=[],SHAPES={},SHAPES_LOADED=false,SHAPE_BUSY=false;
-const LEAF='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
-function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((res,rej)=>{const c=document.createElement('link');c.rel='stylesheet';c.href=LEAF+'leaflet.min.css';document.head.appendChild(c);
- const sc=document.createElement('script');sc.src=LEAF+'leaflet.min.js';sc.onload=()=>res();sc.onerror=rej;document.head.appendChild(sc);setTimeout(()=>rej('timeout'),12000)})}
+const LEAF='lib/leaflet/';
+function loadLeaflet(){if(window.L)return Promise.resolve();return new Promise((res,rej)=>{const c=document.createElement('link');c.rel='stylesheet';c.href=LEAF+'leaflet.css';document.head.appendChild(c);
+ const sc=document.createElement('script');sc.src=LEAF+'leaflet.js';sc.onload=()=>res();sc.onerror=rej;document.head.appendChild(sc);setTimeout(()=>rej('timeout'),12000)})}
 const fixRing=r=>{const lo=r.some(p=>p[0]<-160),hi=r.some(p=>p[0]>160);return r.map(([x,y])=>[y,lo&&hi&&x<0?x+360:x])};
 const inkOf=cc=>INKS[hash(cc)%INKS.length];
 /* country / city colour by zoom: strong when zoomed out, soft wash over streets when zoomed in */
@@ -588,7 +633,7 @@ function restyle(){if(!LMAP)return;const z=LMAP.getZoom();showRoutes();LC.forEac
  LMAP.getContainer().classList.toggle('show-lbl',z>=5);LMAP.getContainer().classList.toggle('far',z<4)}
 /* accurate boundaries from OpenStreetMap (Nominatim), fetched once per place and kept on the phone */
 async function nomi(lat,lon,zoom,th){const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
- try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=${zoom}&polygon_geojson=1&polygon_threshold=${th}&accept-language=zh-TW`,{signal:ctl.signal});if(!r.ok)return null;return await r.json()}catch(e){return null}finally{clearTimeout(to)}}
+ try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${(+lat).toFixed(2)}&lon=${(+lon).toFixed(2)}&zoom=${zoom}&polygon_geojson=1&polygon_threshold=${th}&accept-language=zh-TW`,{signal:ctl.signal});if(!r.ok)return null;return await r.json()}catch(e){return null}finally{clearTimeout(to)}}
 async function nomiSearch(q,cc){const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
  try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&countrycodes=${cc.toLowerCase()}&polygon_geojson=1&polygon_threshold=0.002&limit=1&accept-language=zh-TW`,{signal:ctl.signal});if(!r.ok)return null;const j=await r.json();return j[0]||{}}catch(e){return null}finally{clearTimeout(to)}}
 async function ensureShapes(countries,cities,queries=[]){if(SHAPE_BUSY||!navigator.onLine)return;
@@ -614,7 +659,7 @@ function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDAT
   if(label)L.tooltip({permanent:true,direction:'center',className:'clbl',interactive:false}).setLatLng([g.lat,g.lon]).setContent(esc(label)).addTo(LLAYER)}
  for(const g of groups){const ps=g.ps,t=tripOf.get(ps[0].id),n=ps.length,a=ps[0].t,b=ps[n-1].t,label=(SHAPES['g:'+g.k]?.name)||g.city||cname(g.cc);
   const icon=L.divIcon({className:'',html:`<div class="pin${n===1?' one':''}" style="background:${inkOf(g.cc===homeCC()?g.k:g.cc)}">${n>99?'99+':n}</div>`,iconSize:n===1?[22,22]:[30,30],iconAnchor:n===1?[11,30]:[15,40]});
-  const th=ps.filter(p=>p.th).slice(0,4).map(p=>`<img src="${p.th}" alt="">`).join('');
+  const th=ps.filter(p=>p.th).slice(0,4).map(p=>`<img src="${esc(safeImg(p.th))}" alt="">`).join('');
   L.marker([g.lat,g.lon],{icon}).bindPopup(`<div class="pop"><b>${esc(label)}</b><div class="s">${esc(cname(g.cc))} · ${zdate(a)}${dayStart(b)>dayStart(a)?' – '+zdate(b):''} · ${n} 張</div>${th?`<div class="ph">${th}</div>`:''}${t?`<button data-k="${esc(t.key)}">打開這枚${t.domestic?'紀念章':'入境章'}</button>`:''}</div>`,{maxWidth:220}).addTo(LLAYER)}
  restyle()}
 /* ---------- flight routes: each journey drawn as dashed arcs with a little plane ---------- */
@@ -766,7 +811,7 @@ const hm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'
 async function afterChange(before,backKey){await save();const nw=newTrips(before);closeSheet();renderAll();
  if(nw.length)ceremony(nw);else{toast('已更新');if(backKey&&trips().some(t=>t.key===backKey))openTrip(backKey)}}
 function editPhoto(p,backKey){
- sheet(`<h3>修改照片地點</h3>${p.th?`<img src="${p.th}" alt="" style="width:100%;max-height:36vh;object-fit:contain;border-radius:10px;background:#111;margin:6px 0">`:''}
+ sheet(`<h3>修改照片地點</h3>${p.th?`<img src="${esc(safeImg(p.th))}" alt="" style="width:100%;max-height:36vh;object-fit:contain;border-radius:10px;background:#111;margin:6px 0">`:''}
  <div class="sub">目前：${esc(cname(p.cc))}${p.city?' · '+esc(p.city):''}${p.lat!=null?'（照片定位）':''}</div>
  <label for="ecq">國家／地區</label>${picker('ec',p.cc)}
  <label for="ecity">城市（選填）</label><input id="ecity" value="${esc(p.city||'')}" placeholder="例如：京都">
@@ -803,7 +848,7 @@ function askLocation(list,done){list.sort((a,b)=>a.t-b.t);
  const g=list.map(guess);
  sheet(`<h3>${list.length} 張照片沒有位置資訊</h3><div class="sub">可以一張一張指定國家。有標「依拍攝時間推測」的，是參考同一天其他有定位的照片幫你先填好，可以改。</div>
  <details class="bulk"><summary>一次套用到全部</summary><label for="npallq">國家／地區</label>${picker('npall','')}<label for="npallc">城市（選填）</label><input id="npallc"><button class="btn alt" id="npapply">套用到所有沒略過的照片</button></details>
- ${list.map((p,i)=>`<div class="np" id="np${i}r"><div class="np-top">${p.th?`<img src="${p.th}" alt="">`:'<i class="noimg"></i>'}<div class="np-d"><b>${zdate(p.t)}</b><span>${hm(p.t)}</span>${g[i]?'<em class="tag">依拍攝時間推測</em>':''}</div>
+ ${list.map((p,i)=>`<div class="np" id="np${i}r"><div class="np-top">${p.th?`<img src="${esc(safeImg(p.th))}" alt="">`:'<i class="noimg"></i>'}<div class="np-d"><b>${zdate(p.t)}</b><span>${hm(p.t)}</span>${g[i]?'<em class="tag">依拍攝時間推測</em>':''}</div>
  ${i?`<button type="button" class="mini" data-same="${i}">同上</button>`:''}<button type="button" class="mini" data-skip="${i}">略過</button></div>
  ${picker('np'+i,g[i]?.cc||'')}<input id="npc${i}" placeholder="城市（選填）" value="${esc(g[i]?.city||'')}" style="margin-top:6px"></div>`).join('')}
  <button class="btn" id="lok">完成並蓋章</button><button class="btn alt" id="lskip">全部略過</button>`,()=>{$('#sheetBody').onclick=null;done()});
@@ -900,8 +945,10 @@ $('#exp').onclick=async()=>{if(NATIVE)return nativeFile('travel-passport-backup-
  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}}catch(e){if(e.name==='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;a.click();toast('備份檔已下載')};
 $('#impB').onclick=()=>$('#bfile').click();
-$('#bfile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const j=JSON.parse(await f.text());if(!Array.isArray(j.photos))throw 0;
- const ids=new Set(PHOTOS.map(p=>p.id));PHOTOS.push(...j.photos.filter(p=>!ids.has(p.id)));Object.assign(NOTES,j.notes||{});if(j.settings?.name)SETTINGS.name=j.settings.name;await save();renderAll();toast('已還原備份')}catch(err){toast('這不是有效的備份檔')}};
+$('#bfile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{if(f.size>300*1024*1024)throw 0;const j=JSON.parse(await f.text());if(!j||!Array.isArray(j.photos))throw 0;
+ const ids=new Set(PHOTOS.map(p=>p.id)),inc=j.photos.slice(0,200000).map(cleanPhoto).filter(p=>p&&!ids.has(p.id));PHOTOS.push(...inc);
+ const nn=cleanNotes(j.notes);for(const k in nn)if(!NOTES[k])NOTES[k]=nn[k];const st=cleanSettings(j.settings);if(st.name&&!SETTINGS.name)SETTINGS.name=st.name;if(st.home!==undefined&&SETTINGS.home===undefined)SETTINGS.home=st.home;
+ await save();renderAll();toast(`已還原備份，加入 ${inc.length} 筆紀錄`)}catch(err){toast('這不是有效的備份檔')}};
 let wipeArmed=false;$('#wipe').onclick=async e=>{if(!wipeArmed){wipeArmed=true;e.target.textContent='確定要清除？再按一次';setTimeout(()=>{wipeArmed=false;e.target.textContent='清除全部資料'},4000);return}
  PHOTOS=[];NOTES={};await save();renderAll();e.target.textContent='清除全部資料';wipeArmed=false;toast('已清除')};
 $('#nameIn').onchange=async e=>{SETTINGS.name=e.target.value.trim();await save();$('#title').textContent=SETTINGS.name||'我的旅行護照'};
@@ -912,7 +959,7 @@ let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on
 function renderAll(){renderPass();renderStats();if($('#v-map').classList.contains('on'))renderMap()}
 let rw=innerWidth;addEventListener('resize',()=>{if(!WIDEQ.matches&&(innerWidth>=700)!==(rw>=700))renderPass();rw=innerWidth});
 /* ---------- boot ---------- */
-(async()=>{await DB.open();PHOTOS=(await DB.get('photos'))||[];NOTES=(await DB.get('notes'))||{};SETTINGS=(await DB.get('settings'))||{};
+(async()=>{await DB.open();PHOTOS=((await DB.get('photos'))||[]).map(cleanPhoto).filter(Boolean);NOTES=cleanNotes(await DB.get('notes'));SETTINGS=cleanSettings(await DB.get('settings'));
  {const byId=new Map(PHOTOS.map(p=>[p.id,p]));let ch=false;for(const p of [...PHOTOS]){if(!p.th&&/^m\d+e$/.test(p.id)){const base=byId.get(p.id.slice(0,-1));if(base&&base.cc===p.cc){base.tend=Math.max(base.tend||0,p.t);PHOTOS=PHOTOS.filter(x=>x!==p);ch=true}}}if(ch)save()}
  $('#title').textContent=SETTINGS.name||'我的旅行護照';$('#nameIn').value=SETTINGS.name||'';renderPass();
  try{GEO=await (await fetch('countries.json')).json();prep()}catch(e){toast('地圖資料載入失敗')}
@@ -939,7 +986,7 @@ async function nativePicker(){let acc;try{acc=await NP('requestAccess')}catch(e)
  <div class="gbar"><button class="btn" id="gimp" disabled>匯入 0 張</button></div>`);
  const upd=()=>{$('#gimp').textContent=`匯入 ${sel.size} 張`;$('#gimp').disabled=!sel.size};
  const tile=it=>{const d=zdate(it.date),hd=d!==lastDay?`<div class="gday">${d}</div>`:'';lastDay=d;const id='a'+it.id;
-  return hd+`<button type="button" class="gp${sel.has(it.id)?' on':''}${have.has(id)?' had':''}" data-id="${it.id}"><img src="${it.thumb}" alt="" loading="lazy">${have.has(id)?'<em>已匯入</em>':''}</button>`};
+  return hd+`<button type="button" class="gp${sel.has(it.id)?' on':''}${have.has(id)?' had':''}" data-id="${it.id}"><img src="${esc(safeImg(it.thumb))}" alt="" loading="lazy">${have.has(id)?'<em>已匯入</em>':''}</button>`};
  const more=async()=>{if(done)return;$('#gmore').textContent='載入中…';try{const r=await NP('list',{offset:off,limit:90,thumb:220});off+=r.items.length;done=r.items.length<90;
    $('#ggrid').insertAdjacentHTML('beforeend',r.items.map(tile).join(''))}catch(e){toast('讀取相簿失敗')}$('#gmore').textContent=done?'沒有更多照片了':'載入更多';$('#gmore').disabled=done};
  $('#ggrid').onclick=e=>{const b=e.target.closest('.gp');if(!b)return;const id=+b.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);b.classList.toggle('on',sel.has(id));upd()};
