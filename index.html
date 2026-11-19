@@ -385,7 +385,7 @@ const str=(v,max)=>typeof v==='string'?v.replace(/[<>\u0000-\u001f]/g,'').slice(
 /* every record is rebuilt field by field from known types: anything else in a backup is dropped */
 function cleanPhoto(p){if(!p||typeof p!=='object'||typeof p.id!=='string'||!p.id)return null;const t=num(p.t,0,4102444800000);if(t===null)return null;
  const o={id:p.id.slice(0,200),t,lat:num(p.lat,-90,90),lon:num(p.lon,-180,180),cc:typeof p.cc==='string'&&/^[A-Z]{2}$/.test(p.cc)?p.cc:null,city:str(p.city,80),th:safeImg(p.th)};
- if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;return o}
+ if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;if(typeof p.pin==='string'&&p.pin)o.pin=p.pin.slice(0,120);if(typeof p.pinPlace==='string'&&p.pinPlace)o.pinPlace=str(p.pinPlace,80);return o}
 function cleanNotes(n){const o={};if(n&&typeof n==='object')for(const k of Object.keys(n).slice(0,5000))if(typeof n[k]==='string')o[str(k,200)]=n[k].slice(0,20000);return o}
 function cleanSettings(x){const o={};if(!x||typeof x!=='object')return o;if(typeof x.name==='string')o.name=str(x.name,60);
  if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;
@@ -450,7 +450,7 @@ const dayN=t=>Math.round(dayStart(t)/DAY);
    3) inside a journey every country gets ONE stamp, however many times you entered it;
       a short stop at the very start/end of a multi-country journey counts as a transit (過境) */
 function trips(){const H=homeCC(),foreign=[],home=[],nod={};
- for(const p of PHOTOS){if(!p.cc)continue;if(p.cc===H)home.push(p);else if(p.nodate)(nod[p.cc]=nod[p.cc]||[]).push(p);else foreign.push(p)}
+ const pinned=[];for(const p of PHOTOS){if(!p.cc)continue;if(p.pin){pinned.push(p);continue}if(p.cc===H)home.push(p);else if(p.nodate)(nod[p.cc]=nod[p.cc]||[]).push(p);else foreign.push(p)}
  foreign.sort((a,b)=>a.t-b.t);
  const segs=[];let sg=null;
  for(const p of foreign){const pe=p.tend||p.t;if(sg&&sg.cc===p.cc&&p.t-sg.end<=GAP){sg.end=Math.max(sg.end,pe);sg.photos.push(p)}else{sg={cc:p.cc,start:p.t,end:pe,photos:[p]};segs.push(sg)}}
@@ -479,6 +479,10 @@ function trips(){const H=homeCC(),foreign=[],home=[],nod={};
   if(!t||p.t-t.end>GAP||!!p.nodate!==t.nd){t=cur[c]={cc:H,domestic:true,nd:!!p.nodate,start:p.t,end:p.tend||p.t,photos:[],cities:[c]};out.push(t)}
   t.end=Math.max(t.end,p.tend||p.t);t.photos.push(p)}
  out.forEach(t=>{if(!t.domestic)return;const d=new Date(t.start);t.nodate=t.nd;t.key='D-'+t.cities[0]+'-'+(t.nodate?'visited':d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate());t.days=Math.max(1,Math.round((dayStart(t.end)-dayStart(t.start))/DAY)+1)});
+ // pinned photos join the stamp they were added to (same key; if that stamp's date moved, the nearest stamp of that country/place)
+ for(const p of pinned){let t=out.find(x=>x.key===p.pin);if(!t){const c=out.filter(x=>x.cc===p.cc&&(!x.domestic||x.cities[0]===p.pinPlace));t=c.sort((a,b)=>Math.abs(a.start-p.t)-Math.abs(b.start-p.t))[0]}
+  if(!t)continue;t.photos.push(p);t.pinSort=true;if(p.city&&p.cc===t.cc&&!t.domestic&&!t.cities.includes(p.city))t.cities.push(p.city)}
+ out.forEach(t=>{if(t.pinSort)t.photos.sort((a,b)=>a.t-b.t)});
  return out.sort((a,b)=>(a.nodate-b.nodate)||b.start-a.start||(a.transit-b.transit))}
 function snap(){return trips().map(t=>({key:t.key,cc:t.cc,ids:new Set(t.photos.map(p=>p.id))}))}
 /* trips that did not exist before (a record merged into an existing trip of the same country is not new) + carry diary notes over when a trip's key changed */
@@ -586,13 +590,14 @@ document.addEventListener('keydown',e=>{if(!$('#v-pass').classList.contains('on'
 function openTrip(key,back){const t=trips().find(x=>x.key===key);if(!t)return;$('#sheetBody').onclick=null;
  const ph=t.photos.filter(p=>p.th);
  sheet(`<div style="display:flex;gap:12px;align-items:center"><div style="width:84px;flex:none">${stampSVG(t,uid++)}</div><div><h3>${esc(tname(t))}</h3><div class="sub">${t.domestic?esc(cname(t.cc))+' · ':''}${tdate(t)}${!t.domestic&&t.cities.length?' · '+esc(t.cities.join('、')):''}</div></div></div>
- ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><div class="photos">${ph.map((p,i)=>`<img src="${esc(safeImg(p.th))}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章是手動新增的，沒有照片。</div>'}
+ ${ph.length?`<div class="sub" style="margin:10px 0 0">照片 ${ph.length} 張 · 點照片可放大，也可以修改單張照片的地點</div><button class="btn alt" id="addPh">＋ 加入照片到這枚章</button><div class="photos">${ph.map((p,i)=>`<img src="${esc(safeImg(p.th))}" alt="" loading="lazy" decoding="async" data-i="${i}">`).join('')}</div>`:'<div class="sub">這枚章還沒有照片。</div><button class="btn alt" id="addPh">＋ 加入照片到這枚章</button>'}
  ${t.journey&&t.journey.route.length>1?`<div class="route"><span>這趟旅程</span>${routeText(t)}</div>`:''}
  ${t.journey?`<div class="row" style="gap:8px">${t.journey.route.length>1||t.journey.homePts?`<button class="btn alt" id="showRoute">✈︎ 在地圖看路線</button>`:''}<button class="btn alt" id="trToggle">${t.transit?'改成一般入境章':'標記為過境／轉機'}</button></div><button class="btn alt" id="addStop">＋ 補上沒拍照的轉機點</button>`:''}
  <label for="city">城市（可修改）</label><input id="city" value="${esc(t.cities.join('、'))}" placeholder="例如：京都、大阪">
  <label for="diary">旅程日記</label><textarea id="diary" placeholder="寫下這趟旅行的心得、吃了什麼、遇到誰…">${esc(NOTES[key]||'')}</textarea>
  <button class="btn" id="saveTrip">儲存</button><button class="btn alt" id="editTrip">修改這枚章的國家${ph.length?'':'／日期'}</button><button class="btn danger" id="delTrip">刪除這枚${t.domestic?'紀念章':'入境章'}</button>`,back);
  $('#editTrip').onclick=()=>editTrip(t);
+ $('#addPh').onclick=()=>{unlockAudio();closeSheet();pickPhotos({key,cc:t.cc,place:t.domestic?t.cities[0]:''})};
  const tb=$('#trToggle');if(tb)tb.onclick=async()=>{const v=!t.transit;SETTINGS.transit=SETTINGS.transit||{};if(v===t.autoTransit)delete SETTINGS.transit[key];else SETTINGS.transit[key]=v;await save();renderAll();openTrip(key);toast(v?`${cname(t.cc)}標記為過境，不算進去過的國家`:`${cname(t.cc)}改成一般入境章`)};
  const as=$('#addStop');if(as)as.onclick=()=>addStop(t.journey,key);
  const sr=$('#showRoute');if(sr)sr.onclick=()=>{FOCUS_J=t.jid;closeSheet();go('map')};
@@ -823,7 +828,9 @@ $('#file').onchange=async e=>{const files=[...e.target.files];e.target.value='';
   const t=ex.t||f.lastModified||Date.now();recs.push({id:f.name+'|'+f.size+'|'+t,t,lat:ex.lat??null,lon:ex.lon??null,th:await thumb(f)})}
  processImport(recs)};
 /* shared by the web file picker and the Android gallery picker */
-async function processImport(recs){const before=snap();const seen=new Set(PHOTOS.map(p=>p.id));const added=[],noGps=[];
+let IMPORT_PIN=null;
+async function processImport(recs){if(IMPORT_PIN&&Date.now()-IMPORT_PIN.at<20*60e3)return importIntoStamp(recs,IMPORT_PIN);IMPORT_PIN=null;
+ const before=snap();const seen=new Set(PHOTOS.map(p=>p.id));const added=[],noGps=[];
  for(const r of recs){if(seen.has(r.id))continue;seen.add(r.id);const p={id:r.id,t:r.t,lat:r.lat??null,lon:r.lon??null,cc:null,city:'',th:r.th||''};if(p.lat!=null)added.push(p);else noGps.push(p)}
  for(let i=0;i<added.length;i++){const p=added[i];busy(true,`辨識地點 ${i+1}/${added.length}`);p.cc=countryAt(p.lat,p.lon);
   const g=await geocode(p.lat,p.lon);if(g.cc)p.cc=g.cc.toUpperCase();p.city=g.city||''}
@@ -866,7 +873,7 @@ function editPhoto(p,backKey){
  bindPicker('ec');
  $('#eback').onclick=()=>{closeSheet();if(backKey)openTrip(backKey)};
  $('#esave').onclick=async()=>{const cc=$('#ec').value;if(!cc)return toast('請先從清單選一個國家');const before=snap();
-  const city=$('#ecity').value.trim();if(cc!==p.cc){p.lat=null;p.lon=null}if(cc!==p.cc||city!==p.city)p.fixed=true;p.cc=cc;p.city=city;
+  const city=$('#ecity').value.trim();if(cc!==p.cc){p.lat=null;p.lon=null;delete p.pin;delete p.pinPlace}if(cc!==p.cc||city!==p.city)p.fixed=true;p.cc=cc;p.city=city;
   const dv=$('#edate').value;if(dv){const d=new Date(dv+'T'+(p.nodate?'12:00':hm(p.t)));if(!isNaN(d)){p.t=d.getTime();p.nodate=false}}
   afterChange(before,backKey)};
  let armed=false;$('#edel').onclick=async e=>{if(!armed){armed=true;e.target.textContent='再按一次確認移除';return}
@@ -1019,7 +1026,16 @@ let rw=innerWidth;addEventListener('resize',()=>{if(!WIDEQ.matches&&(innerWidth>
 /* ---------- Android app (Capacitor): gallery picker that keeps GPS, saving & sharing files ---------- */
 const CAPX=window.Capacitor,NATIVE=!!(CAPX&&CAPX.isNativePlatform&&CAPX.isNativePlatform());
 const NP=(m,o)=>CAPX.nativePromise('PhotoLocation',m,o||{});
-function pickPhotos(){if(NATIVE)return nativePicker();$('#file').click()}
+function pickPhotos(pin){IMPORT_PIN=pin?{...pin,at:Date.now()}:null;if(NATIVE)return nativePicker();$('#file').click()}
+/* "add photos" from inside a stamp: every chosen photo goes into that stamp, wherever and whenever it was taken */
+async function importIntoStamp(recs,pin){IMPORT_PIN=null;const byId=new Map(PHOTOS.map(p=>[p.id,p]));let n=0,moved=0;
+ for(let i=0;i<recs.length;i++){const r=recs[i],old=byId.get(r.id);
+  if(old){old.pin=pin.key;old.cc=pin.cc;if(pin.place)old.pinPlace=pin.place;moved++;continue}
+  const p={id:r.id,t:r.t,lat:r.lat??null,lon:r.lon??null,cc:pin.cc,city:'',th:r.th||'',pin:pin.key};if(pin.place)p.pinPlace=pin.place;
+  if(p.lat!=null){busy(true,`辨識地點 ${i+1}/${recs.length}`);const g=await geocode(p.lat,p.lon);if((g.cc||'').toUpperCase()===pin.cc)p.city=g.city||''}
+  PHOTOS.push(p);n++}
+ busy(false);await save();renderAll();toast(`已加入 ${n} 張照片${moved?`，另有 ${moved} 張從其他地方移過來`:''}`);
+ const t=trips().find(x=>x.key===pin.key)||trips().find(x=>x.photos.some(p=>p.pin===pin.key));if(t)openTrip(t.key)}
 const b64=str=>{const u=new TextEncoder().encode(str);let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
 async function nativePicker(){let acc;try{acc=await NP('requestAccess')}catch(e){return toast('無法讀取相簿：'+(e.message||e))}
  if(acc.photos==='denied')return sheet(`<h3>需要相簿權限</h3><div class="sub">請到手機「設定 → 應用程式 → 旅行護照 → 權限」，把「相片和影片」設為允許，並允許「存取媒體位置」，才能讀取照片和拍攝地點。</div><button class="btn" id="npOk">知道了</button>`),$('#npOk').onclick=closeSheet;
