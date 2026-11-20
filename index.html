@@ -363,6 +363,7 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 <div class="card"><h2>居住地</h2><div class="help">居住地不會蓋入境章。出國前 2 天到回國後 2 天內在居住地拍的照片（例如在機場拍的），會自動放進那一趟旅程的入境章裡；其他在居住地拍的照片，會依地點蓋上「國內紀念章」，地圖上那個城市也會亮起來。</div>
 <div id="homeBox" style="margin-top:8px"></div><button class="btn alt" id="homeNone">不設定居住地（每個國家都蓋章）</button></div>
 <div class="card help">護照名稱：<input id="nameIn" placeholder="我的旅行護照" style="margin-top:6px"></div>
+<div id="verInfo" style="text-align:center;color:#9db8aa;font-size:13px;margin:4px 0 10px"></div>
 <div class="card help">App 背景：<div class="bgpick" id="bgPick"><button type="button" data-bg="icons">旅行圖案</button><button type="button" data-bg="sunset">夕陽航線</button><button type="button" data-bg="map">復古地圖</button><button type="button" data-bg="classic">經典綠</button></div></div>
 </section>
 </main>
@@ -398,7 +399,7 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 /* iOS home-screen apps sometimes report a viewport shorter than the screen and leave an empty band at the bottom: size the app to the real screen */
 function fixAppHeight(){let h=window.innerHeight;const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
  if(ios&&sa){const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height);if(sh>h&&sh-h<160)h=sh}
- document.documentElement.style.setProperty('--apph',h+'px');document.documentElement.style.setProperty('--gap',Math.max(0,h-window.innerHeight)+'px')}
+ document.documentElement.style.setProperty('--apph',h+'px');document.documentElement.style.setProperty('--gap',Math.max(0,h-window.innerHeight)+'px');const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 37 · 畫面 ${window.innerHeight}/${Math.max(screen.width,screen.height)}${ios&&sa?' · 主畫面模式':''}`}
 fixAppHeight();addEventListener('resize',fixAppHeight);addEventListener('orientationchange',()=>setTimeout(fixAppHeight,300));
 
 {
