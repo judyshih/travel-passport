@@ -39,7 +39,7 @@ header{padding:calc(var(--safe-t) + 10px) 18px 10px;color:var(--gold2);display:f
 header h1{font:600 clamp(19px,5.6vw,24px)/1.15 "Cormorant Garamond",serif;letter-spacing:.04em;margin:0;flex:1}
 header small{display:block;font:500 12px "Barlow Condensed",sans-serif;color:#9db8aa;letter-spacing:.12em}
 .icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid #2d5443;background:#1d4334;color:var(--gold2);display:grid;place-items:center}
-main{overflow:hidden;position:relative}
+main{overflow:hidden;position:relative}.dseg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 2px}.dseg button{min-height:44px;border-radius:9px;border:1px solid #cfd5c8;background:#fff;color:var(--ink);font-size:13.5px;line-height:1.2;padding:4px}.dseg button.on{background:var(--navy);color:var(--gold2);border-color:var(--navy)}
 html[data-bg="icons"] body{background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27260%27 height=%27260%27 viewBox=%270 0 260 260%27%3E%3Cg fill=%27none%27 stroke=%27#e8cf8a%27 stroke-opacity=%27.2%27 stroke-width=%271.6%27 stroke-linejoin=%27round%27 stroke-linecap=%27round%27%3E%0A%3Cpath transform=%27translate(18 22) scale(1.9) rotate(-20 12 12)%27 d=%27M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z%27/%3E%0A%3Cg transform=%27translate(190 46)%27%3E%3Ccircle r=%2717%27/%3E%3Cpath d=%27M0-14L4 0L0 14L-4 0zM-14 0L0 4L14 0L0-4z%27/%3E%3C/g%3E%0A%3Cpath transform=%27translate(96 92)%27 d=%27M0 30L18 6L28 18L36 10L56 30z%27/%3E%0A%3Cg transform=%27translate(24 150)%27%3E%3Crect y=%276%27 width=%2738%27 height=%2726%27 rx=%275%27/%3E%3Ccircle cx=%2719%27 cy=%2719%27 r=%277%27/%3E%3Cpath d=%27M11 6l3-5h10l3 5%27/%3E%3C/g%3E%0A%3Cg transform=%27translate(196 150)%27%3E%3Crect y=%278%27 width=%2732%27 height=%2728%27 rx=%274%27/%3E%3Cpath d=%27M11 8V3h10v5M0 19h32M9 36v3M23 36v3%27/%3E%3C/g%3E%0A%3Cpath transform=%27translate(110 176)%27 d=%27M15 44Q18 22 14 6M14 6Q4 1-3 8M14 6Q25-1 31 6M14 6Q5 10 3 19M14 6Q23 10 26 19%27/%3E%0A%3Cg transform=%27translate(150 110)%27%3E%3Ccircle r=%2714%27/%3E%3Cellipse rx=%276%27 ry=%2714%27/%3E%3Cpath d=%27M-14 0h28%27/%3E%3C/g%3E%0A%3Cpath d=%27M60 240Q130 200 230 236%27 stroke-dasharray=%272 7%27/%3E%3Cpath d=%27M70 90Q120 60 170 70%27 stroke-dasharray=%272 7%27/%3E%3C/g%3E%3C/svg%3E") 0 0/260px 260px,radial-gradient(120% 80% at 50% 0%,#245a44 0%,#16382b 50%,#0c231a 100%)}
 html[data-bg="sunset"] body{background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%27360%27 viewBox=%270 0 360 360%27%3E%3Cg fill=%27none%27 stroke=%27#fff%27 stroke-opacity=%27.2%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-dasharray=%272 8%27%3E%3Cpath d=%27M-10 120Q120 30 260 90T380 70%27/%3E%3Cpath d=%27M-10 300Q140 200 280 260T380 250%27/%3E%3C/g%3E%0A%3Cg fill=%27#fff%27 fill-opacity=%27.28%27%3E%3Cpath transform=%27translate(242 70) scale(1.1) rotate(-12 12 12)%27 d=%27M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z%27/%3E%3Cpath transform=%27translate(96 214) scale(.9) rotate(-25 12 12)%27 d=%27M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z%27/%3E%3C/g%3E%0A%3Cg fill=%27#fff%27 fill-opacity=%27.35%27%3E%3Ccircle cx=%2740%27 cy=%2740%27 r=%271.2%27/%3E%3Ccircle cx=%27170%27 cy=%2722%27 r=%271%27/%3E%3Ccircle cx=%27320%27 cy=%27160%27 r=%271.3%27/%3E%3Ccircle cx=%27210%27 cy=%27170%27 r=%27.9%27/%3E%3Ccircle cx=%2760%27 cy=%27190%27 r=%271%27/%3E%3Ccircle cx=%27300%27 cy=%27320%27 r=%271%27/%3E%3Ccircle cx=%27150%27 cy=%27330%27 r=%271.2%27/%3E%3C/g%3E%3C/svg%3E") 0 0/360px 360px,linear-gradient(180deg,#14223f 0%,#2c2d58 38%,#6b3b67 70%,#9a4f5c 100%);--navbg:rgba(20,22,48,.92);--navbd:#3a3a66}
 html[data-bg="map"] body{background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27340%27 height=%27340%27 viewBox=%27-170 -170 340 340%27%3E%3Cg fill=%27none%27 stroke=%27#e8cf8a%27 stroke-opacity=%27.16%27 stroke-width=%271.5%27%3E%3Ccircle r=%27150%27/%3E%3Ccircle r=%27138%27/%3E%3Ccircle r=%2760%27/%3E%3Cpath d=%27M0-160L18-18L160 0L18 18L0 160L-18 18L-160 0L-18-18z%27/%3E%3Cpath d=%27M0-160V160M-160 0H160%27 stroke-dasharray=%272 6%27/%3E%3Cpath d=%27M-90-90L-10 0L-90 90M90-90L10 0L90 90%27 stroke-opacity=%27.1%27/%3E%3C/g%3E%3Cg fill=%27#e8cf8a%27 fill-opacity=%27.18%27 font-family=%27serif%27 font-size=%2722%27 text-anchor=%27middle%27%3E%3Ctext y=%27-118%27%3EN%3C/text%3E%3Ctext y=%27134%27%3ES%3C/text%3E%3Ctext x=%27126%27 y=%278%27%3EE%3C/text%3E%3Ctext x=%27-126%27 y=%278%27%3EW%3C/text%3E%3C/g%3E%3C/svg%3E") right -60px bottom 40px/340px 340px no-repeat,repeating-linear-gradient(0deg,rgba(232,207,138,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(232,207,138,.06) 0 1px,transparent 1px 56px),radial-gradient(110% 80% at 30% 10%,#1b4b52 0%,#123a40 50%,#0a2428 100%);--navbg:rgba(8,32,36,.94);--navbd:#24484d}
@@ -402,7 +402,7 @@ const str=(v,max)=>typeof v==='string'?v.replace(/[<>\u0000-\u001f]/g,'').slice(
 /* every record is rebuilt field by field from known types: anything else in a backup is dropped */
 function cleanPhoto(p){if(!p||typeof p!=='object'||typeof p.id!=='string'||!p.id)return null;const t=num(p.t,0,4102444800000);if(t===null)return null;
  const o={id:p.id.slice(0,200),t,lat:num(p.lat,-90,90),lon:num(p.lon,-180,180),cc:typeof p.cc==='string'&&/^[A-Z]{2}$/.test(p.cc)?p.cc:null,city:str(p.city,80),th:safeImg(p.th)};
- if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;if(typeof p.pin==='string'&&p.pin)o.pin=p.pin.slice(0,120);if(typeof p.pinPlace==='string'&&p.pinPlace)o.pinPlace=str(p.pinPlace,80);return o}
+ if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;if(p.dp==='y'||p.dp==='m')o.dp=p.dp;if(typeof p.pin==='string'&&p.pin)o.pin=p.pin.slice(0,120);if(typeof p.pinPlace==='string'&&p.pinPlace)o.pinPlace=str(p.pinPlace,80);return o}
 function cleanNotes(n){const o={};if(n&&typeof n==='object')for(const k of Object.keys(n).slice(0,5000))if(typeof n[k]==='string')o[str(k,200)]=n[k].slice(0,20000);return o}
 function cleanSettings(x){const o={};if(!x||typeof x!=='object')return o;if(typeof x.name==='string')o.name=str(x.name,60);
  if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;if(x.cl3===true)o.cl3=true;if(['icons','sunset','map','classic'].includes(x.bg))o.bg=x.bg;
@@ -512,25 +512,28 @@ function newTrips(S){const now=trips();let moved=false;
 const abroad=T=>T.filter(t=>!t.domestic),domestic=T=>T.filter(t=>t.domestic);
 const tname=t=>t.domestic?t.cities[0]:cname(t.cc);
 const md=t=>{const d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()};
-const tdate=t=>{if(t.nodate)return'日期未填';if(t.visits&&t.visits.length>1)return new Date(t.start).getFullYear()+' · '+t.visits.map(([a,b])=>dayStart(a)===dayStart(b)?md(a):md(a)+'–'+md(b)).join('、')+' · 共 '+t.days+' 天';return zdate(t.start)+(t.days>1?' – '+zdate(t.end):'')+' · '+t.days+' 天'};
+const tdate=t=>{if(t.nodate)return'日期未填';if(prec(t))return listDate(t);if(t.visits&&t.visits.length>1)return new Date(t.start).getFullYear()+' · '+t.visits.map(([a,b])=>dayStart(a)===dayStart(b)?md(a):md(a)+'–'+md(b)).join('、')+' · 共 '+t.days+' 天';return zdate(t.start)+(t.days>1?' – '+zdate(t.end):'')+' · '+t.days+' 天'};
 const routeText=t=>t.journey?t.journey.route.map(r=>{const st=r.seg.stamp;return (st===t?'<b>':'')+esc(cname(r.seg.cc))+(st&&st.transit?'（過境）':'')+(st===t?'</b>':'')}).join(' → '):'';
 const dayStart=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
 const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const prec=t=>!t||t.nodate||!t.photos||!t.photos.length||!t.photos.every(p=>p.dp)?'':t.photos.every(p=>p.dp==='y')?'y':'m';
+const stDate=t=>{if(t.nodate)return'VISITED';const p=prec(t),d=new Date(t.start);return p==='y'?String(d.getFullYear()):p==='m'?MON[d.getMonth()]+' '+d.getFullYear():fdate(t.start)};
+const listDate=t=>{if(t.nodate)return'日期未填';const p=prec(t),d=new Date(t.start);return p==='y'?d.getFullYear()+' 年':p==='m'?d.getFullYear()+'/'+(d.getMonth()+1):zdate(t.start)};
 const fdate=t=>{const d=new Date(t);return String(d.getDate()).padStart(2,'0')+' '+MON[d.getMonth()]+' '+d.getFullYear()};
 const zdate=t=>{const d=new Date(t);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()};
 /* ---------- stamp art ---------- */
 const INKS=['#b42335','#1f4fa8','#5b2a86','#13704f','#a3471b','#20366b','#8c1d5e','#2f6f7e'];
 const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
 function stampSVG(t,uid){const h=hash(t.key),c=INKS[h%INKS.length],shape=(h>>3)%4,id='p'+uid;
- const cn=esc(cname(t.cc)),en=esc(ename(t.cc)).slice(0,20),city=esc((t.cities[0]||'').slice(0,14)),dt=t.nodate?'VISITED':fdate(t.start);
+ const cn=esc(cname(t.cc)),en=esc(ename(t.cc)).slice(0,20),city=esc((t.cities[0]||'').slice(0,14)),dt=stDate(t);
  const T=(x,y,s,txt,w=700,f="'Barlow Condensed','Avenir Next Condensed','Arial Narrow'")=>`<text x="${x}" y="${y}" font-size="${s}" font-weight="${w}" text-anchor="middle" font-family="${f},sans-serif" fill="${c}">${txt}</text>`;
  const CJ=(x,y,s,txt)=>`<text x="${x}" y="${y}" font-size="${s}" font-weight="700" text-anchor="middle" font-family="PingFang TC,Noto Sans TC,sans-serif" fill="${c}">${txt}</text>`;
  if(t.transit){const fl=GEO?.m[t.cc]?.f||'',cs2=cn.length>5?14:18;
-  const gt=`<circle cx="100" cy="100" r="64" fill="none" stroke="${c}" stroke-width="4" stroke-dasharray="10 5"/><circle cx="100" cy="100" r="55" fill="none" stroke="${c}" stroke-width="1.4"/>${T(100,93,12,'TRANSIT · 過境')}${CJ(100,116,cs2,cn)}${T(100,135,13,t.nodate?'VISITED':fdate(t.start))}`;
+  const gt=`<circle cx="100" cy="100" r="64" fill="none" stroke="${c}" stroke-width="4" stroke-dasharray="10 5"/><circle cx="100" cy="100" r="55" fill="none" stroke="${c}" stroke-width="1.4"/>${T(100,93,12,'TRANSIT · 過境')}${CJ(100,116,cs2,cn)}${T(100,135,13,stDate(t))}`;
   return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g filter="url(#ink)" opacity=".9">${gt}</g>${fl?`<text x="100" y="77" font-size="18" text-anchor="middle" font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif" opacity=".85">${fl}</text>`:''}</svg>`}
  if(t.domestic){const raw=(t.cities[0]||''),lat=!/[\u3400-\u9fff]/.test(raw),nm=esc(raw.slice(0,lat?14:8)),fs=lat?(raw.length<=5?32:raw.length<=8?26:raw.length<=11?20:16):(nm.length<=3?34:nm.length<=5?26:20);
   const gd=`<rect x="22" y="26" width="156" height="148" rx="28" fill="none" stroke="${c}" stroke-width="5"/><rect x="31" y="35" width="138" height="130" rx="20" fill="none" stroke="${c}" stroke-width="1.6"/>
-  ${T(100,62,13,'SOUVENIR · 紀念章')}${lat?T(100,74+fs*.9,fs,nm.toUpperCase()):CJ(100,74+fs*.9,fs,nm)}<line x1="46" y1="${86+fs*.9}" x2="154" y2="${86+fs*.9}" stroke="${c}" stroke-width="1.4"/>${T(100,108+fs*.9,17,t.nodate?'VISITED':fdate(t.start))}
+  ${T(100,62,13,'SOUVENIR · 紀念章')}${lat?T(100,74+fs*.9,fs,nm.toUpperCase()):CJ(100,74+fs*.9,fs,nm)}<line x1="46" y1="${86+fs*.9}" x2="154" y2="${86+fs*.9}" stroke="${c}" stroke-width="1.4"/>${T(100,108+fs*.9,17,stDate(t))}
   <path d="M86 ${126+fs*.9}l7-9 5 6 4-4 8 7z" fill="${c}"/>`;
   return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g filter="url(#ink)" opacity=".95">${gd}</g></svg>`}
  let g='',fx=null;const cs=cn.length>5?15:19,fl=GEO?.m[t.cc]?.f||'';
@@ -626,7 +629,6 @@ function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const WMK=[...ne
   :`<div class="empty"><b>${D.length?'還沒有出國的入境章':'這本護照還是空白的'}</b>按右上角「＋ 新增」，選幾張旅行時拍的照片；沒有照片的國家也可以手動蓋章。選好照片後，就會自動辨識地點，替你蓋上第一枚入境章。</div>`}
   <div class="page-n">— ${i+1} —</div></div>`})];
  PKEYS=[new Set(),...pages.map(P=>new Set(P.l.map(t=>t.key)))];
- if(T.length&&!renderPass.done){renderPass.done=1;PIDX=1}
  buildUnits();showPage(PIDX)}
 /* ---------- page turning like a real book ---------- */
 let PAGES=[],PKEYS=[],PIDX=0,UNITS=[],UIDX=0,FLIPPING=false,JUSTDRAG=false,FDIR=0,FA=0;
@@ -873,7 +875,7 @@ const flagOf=cc=>GEO?.m[cc]?.f||'';
 const rowB=(attrs,l,r)=>`<li><button ${attrs}><span>${l}</span><span>${r} <i class="chev">›</i></span></button></li>`;
 function statsSheet(act,arg){const ALL=trips(),AB=abroad(ALL),T=AB.filter(t=>!t.transit),D=domestic(ALL),back=()=>statsSheet(act,arg);let h='';
  const bycc={};T.forEach(t=>{const o=bycc[t.cc]=bycc[t.cc]||{n:0,d:0,last:0,cities:new Set()};o.n++;o.d+=t.days;o.last=Math.max(o.last,t.start);t.cities.forEach(c=>o.cities.add(c))});
- const stampRow=t=>rowB(`data-trip="${esc(t.key)}"`,`${t.domestic?'🏞️':flagOf(t.cc)} ${esc(tname(t))}${t.transit?'（過境）':''}`,t.nodate?'日期未填':zdate(t.start));
+ const stampRow=t=>rowB(`data-trip="${esc(t.key)}"`,`${t.domestic?'🏞️':flagOf(t.cc)} ${esc(tname(t))}${t.transit?'（過境）':''}`,listDate(t));
  if(act==='countries'){const L=Object.keys(bycc).sort((a,b)=>bycc[b].n-bycc[a].n||bycc[b].d-bycc[a].d);
   h=`<h3>去過的國家 · ${L.length} 個</h3><div class="sub">依去的次數排列，點國家看每一次的入境章</div><ul class="list dl">${L.map(c=>rowB(`data-cc="${c}"`,`${flagOf(c)} ${esc(cname(c))}`,`${bycc[c].n} 次 · ${bycc[c].d} 天`)).join('')}</ul>`}
  else if(act==='cities'){const by={};T.forEach(t=>t.photos.forEach(p=>{if(!p.city||p.cc===homeCC())return;const k=p.cc+'|'+p.city;(by[k]=by[k]||{cc:p.cc,city:p.city,n:0,t:null}).n+=p.th?1:0;by[k].t=by[k].t&&by[k].t.start>t.start?by[k].t:t}));
@@ -1010,18 +1012,15 @@ function editTrip(t){const manual=t.photos.every(p=>!p.th);
  sheet(`<h3>修改這枚入境章</h3><div class="sub">會套用到這趟旅程的全部 ${t.photos.length} 筆紀錄。只想改其中一張照片，請點照片後按「修改地點」。</div>
  <label for="etq">國家／地區</label>${picker('et',t.cc)}
  <label for="etcity">城市（選填）</label><input id="etcity" value="${esc(t.cities.join('、'))}">
- ${manual?`<label class="chk"><input type="checkbox" id="etnd" ${t.nodate?'checked':''}> 不記得日期，只記錄去過</label>
- <div class="row" id="etdates"><div><label for="etd1">入境日期</label><input type="date" id="etd1" value="${t.nodate?'':ymd(t.start)}"></div><div><label for="etd2">離境日期</label><input type="date" id="etd2" value="${t.nodate?'':ymd(t.end)}"></div></div>`:''}
+ ${manual?dateBlock('et',t.nodate?'n':prec(t)||'d',t.nodate?0:t.start,t.nodate?0:t.end):''}
  <button class="btn" id="etsave">儲存</button><button class="btn alt" id="etback">取消</button>`,()=>openTrip(t.key));
- bindPicker('et');const nd=$('#etnd');if(nd){const f=()=>$('#etdates').style.display=nd.checked?'none':'';nd.onchange=f;f()}
+ bindPicker('et');if(manual)bindDate('et');
  $('#etback').onclick=()=>{closeSheet();openTrip(t.key)};
  $('#etsave').onclick=async()=>{const cc=$('#et').value;if(!cc)return toast('請先從清單選一個國家');const before=snap(),old=t.key;
-  const city=$('#etcity').value.split(/[、,，]/)[0].trim();
+  const city=$('#etcity').value.split(/[、,，]/)[0].trim();const dr=manual?readDate('et'):null;if(dr&&dr.err)return toast(dr.err);
   t.photos.forEach(p=>{if(cc!==p.cc){p.lat=null;p.lon=null}p.cc=cc;p.city=city});
   if(manual){const extra=new Set(t.photos.slice(1));if(extra.size)PHOTOS=PHOTOS.filter(x=>!extra.has(x));t.photos=t.photos.slice(0,1);
-   if(nd.checked)t.photos.forEach(p=>{p.nodate=true;p.t=0;delete p.tend});
-   else{const a=new Date($('#etd1').value+'T12:00').getTime(),b=new Date(($('#etd2').value||$('#etd1').value)+'T12:00').getTime();if(isNaN(a))return toast('請選日期，或勾選「不記得日期」');
-    t.photos.forEach(p=>{p.nodate=false;p.t=Math.min(a,b);if(b!==a)p.tend=Math.max(a,b);else delete p.tend})}}
+   t.photos.forEach(p=>applyDate(p,dr))}
   afterChange(before,trips().find(x=>x.photos.includes(t.photos[0]))?.key)}}
 /* guess a place for a photo without GPS from photos taken close in time */
 function guess(p){let best=null,bd=12*3600e3;for(const q of PHOTOS){if(!q.cc||q.nodate)continue;const d=Math.abs(q.t-p.t);if(d<bd){bd=d;best=q}}return best}
@@ -1050,22 +1049,35 @@ $('#addBtn').onclick=()=>{unlockAudio();sheet(`<h3>新增入境章</h3><div clas
  <button class="btn alt" id="mMan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16M7 16l1-4 8-8 3 3-8 8-4 1z"/></svg>手動蓋章（沒有照片也可以）</button>
  <button class="btn alt" id="mGp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>從 Google 相簿匯入（Takeout）</button>`);
  $('#mImp').onclick=()=>{closeSheet();pickPhotos()};$('#mGp').onclick=gpSheet;$('#mMan').onclick=()=>{$('#manual').click()}};
+/* date with optional precision: full dates, year + month, year only, or no date */
+function dateBlock(px,mode,a,b){const y=new Date().getFullYear(),d1=a?ymd(a):ymd(Date.now()),d2=b?ymd(b):d1,mo=d1.slice(0,7),yr=d1.slice(0,4);
+ return `<label>日期</label><div class="dseg" id="${px}seg">${[['d','完整日期'],['m','只記得年月'],['y','只記得年份'],['n','不記得']].map(([k,l])=>`<button type="button" data-m="${k}" class="${k===mode?'on':''}">${l}</button>`).join('')}</div>
+ <div class="row" id="${px}D"><div><label for="${px}d1">入境日期</label><input type="date" id="${px}d1" value="${d1}"></div><div><label for="${px}d2">離境日期</label><input type="date" id="${px}d2" value="${d2}"></div></div>
+ <div id="${px}M"><label for="${px}mo">月份</label><input type="month" id="${px}mo" value="${mo}"></div>
+ <div id="${px}Y"><label for="${px}yr">年份</label><input type="number" inputmode="numeric" id="${px}yr" min="1950" max="${y}" value="${yr}" placeholder="例如：2019"></div>`}
+function bindDate(px){const seg=$('#'+px+'seg');const show=()=>{const m=seg.querySelector('.on').dataset.m;$('#'+px+'D').style.display=m==='d'?'':'none';$('#'+px+'M').style.display=m==='m'?'':'none';$('#'+px+'Y').style.display=m==='y'?'':'none'};
+ seg.onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));show()};show()}
+function readDate(px){const m=$('#'+px+'seg .on').dataset.m;if(m==='n')return{nodate:true};
+ if(m==='y'){const y=+$('#'+px+'yr').value;if(!(y>=1900&&y<=new Date().getFullYear()))return{err:'請填年份，例如 2019'};return{t:new Date(y,0,1,12).getTime(),dp:'y'}}
+ if(m==='m'){const v=$('#'+px+'mo').value;const [y,mo]=v.split('-').map(Number);if(!y||!mo)return{err:'請選月份'};return{t:new Date(y,mo-1,1,12).getTime(),dp:'m'}}
+ const a=new Date($('#'+px+'d1').value+'T12:00').getTime(),b=new Date(($('#'+px+'d2').value||$('#'+px+'d1').value)+'T12:00').getTime();if(isNaN(a))return{err:'請選日期'};
+ return b!==a&&!isNaN(b)?{t:Math.min(a,b),tend:Math.max(a,b)}:{t:a}}
+function applyDate(p,r){if(r.nodate){p.nodate=true;p.t=0;delete p.tend;delete p.dp;return}p.nodate=false;p.t=r.t;if(r.tend)p.tend=r.tend;else delete p.tend;if(r.dp)p.dp=r.dp;else delete p.dp}
 $('#manual').onclick=$('#manual2').onclick=()=>{const today=new Date().toISOString().slice(0,10);
  sheet(`<h3>手動新增入境章</h3><div class="sub">適合沒有照片，或想補登以前的旅行。</div>
  <label for="mcq">國家／地區</label>${picker('mc','')}
  <label for="mcity">城市（選填；國內旅遊請填地點，例如：阿里山）</label><input id="mcity" placeholder="例如：首爾、阿里山">
- <label class="chk"><input type="checkbox" id="mnd"> 不記得日期，只記錄去過這個國家</label>
- <div class="row" id="mdates"><div><label for="md">入境日期</label><input type="date" id="md" value="${today}"></div><div><label for="md2">離境日期</label><input type="date" id="md2" value="${today}"></div></div>
+ ${dateBlock('mk','d')}
  <button class="btn alt" id="here">使用我現在的位置</button><button class="btn" id="mok">蓋章</button>`);
- bindPicker('mc');$('#mnd').onchange=e=>$('#mdates').style.display=e.target.checked?'none':'';
+ bindPicker('mc');bindDate('mk');
  $('#here').onclick=()=>{if(!navigator.geolocation)return toast('這個瀏覽器無法定位');$('#here').textContent='定位中…';
   navigator.geolocation.getCurrentPosition(async pos=>{const {latitude:a,longitude:o}=pos.coords;const g=await geocode(a,o);const cc=(g.cc||countryAt(a,o)||'').toUpperCase();
    if(cc)setPicker('mc',cc);if(g.city)$('#mcity').value=g.city;$('#here').textContent='已帶入目前位置'},()=>{$('#here').textContent='無法取得位置';},{timeout:10000})};
  $('#mok').onclick=async()=>{unlockAudio();const before=snap();const cc=$('#mc').value,city=$('#mcity').value.trim();if(!cc)return toast('請先從清單選一個國家');if(cc===homeCC()&&!city)return toast(`${cname(cc)}是你的居住地，請在「城市」填上去過的地方（例如：阿里山），會蓋一枚國內紀念章`);
   const id='m'+Date.now();
-  if($('#mnd').checked){PHOTOS.push({id,t:0,nodate:true,lat:null,lon:null,cc,city,th:''});await save();closeSheet();renderAll();const nw=newTrips(before);if(nw.length)ceremony(nw);else toast('這個國家已經在護照裡了');return}
-  const a=new Date($('#md').value+'T12:00').getTime(),b=new Date(($('#md2').value||$('#md').value)+'T12:00').getTime();if(isNaN(a))return toast('請選日期');
-  const rec={id,t:Math.min(a,b),lat:null,lon:null,cc,city,th:''};if(b!==a)rec.tend=Math.max(a,b);PHOTOS.push(rec);
+  const dr=readDate('mk');if(dr.err)return toast(dr.err);
+  if(dr.nodate){PHOTOS.push({id,t:0,nodate:true,lat:null,lon:null,cc,city,th:''});await save();closeSheet();renderAll();const nw=newTrips(before);if(nw.length)ceremony(nw);else toast('這個國家已經在護照裡了');return}
+  const rec={id,lat:null,lon:null,cc,city,th:''};applyDate(rec,dr);PHOTOS.push(rec);
   await save();closeSheet();renderAll();const nw=newTrips(before);if(nw.length)ceremony(nw);else{const tt=trips().find(x=>x.photos.includes(rec));toast(tt?`已合併到 ${cname(cc)} ${tdate(tt)} 的入境章`:'已加入既有的入境章')}}};
 /* ---------- ceremony animation ---------- */
 let AC=null;
