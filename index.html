@@ -52,7 +52,7 @@ html[data-bg="icons"] nav,html[data-bg="sunset"] nav,html[data-bg="map"] nav{bac
 
 .view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 14px 24px;display:none}
 .view.on{display:block}
-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--navy2);border-top:1px solid #2a4d3e;padding-bottom:var(--safe-b)}
+nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--navy2);border-top:1px solid #2a4d3e;padding-bottom:var(--navpad,var(--safe-b))}
 nav button{background:none;border:0;color:#86a596;padding:9px 0 7px;font-size:12px;display:grid;justify-items:center;gap:2px;min-height:54px}
 nav button svg{width:24px;height:24px}
 nav button.on{color:var(--gold2)}
@@ -396,10 +396,13 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 <div class="toast" id="toast"></div>
 
 <script>
-/* iOS home-screen apps sometimes report a viewport shorter than the screen and leave an empty band at the bottom: size the app to the real screen */
-function fixAppHeight(){let h=window.innerHeight;const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
- if(ios&&sa){const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height);if(sh>h&&sh-h<160)h=sh}
- document.documentElement.style.setProperty('--apph',h+'px');document.documentElement.style.setProperty('--gap',Math.max(0,h-window.innerHeight)+'px');const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 37 · 畫面 ${window.innerHeight}/${Math.max(screen.width,screen.height)}${ios&&sa?' · 主畫面模式':''}`}
+/* iOS home-screen apps sometimes get a page area shorter than the screen: the strip below it cannot be drawn on (it shows the page color).
+   Size the app to the drawable area, and when that strip already covers the home-indicator zone, drop the toolbar's extra bottom padding */
+function fixAppHeight(){const h=window.innerHeight,ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+ const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=ios&&sa&&sh>h&&sh-h<160?sh-h:0;
+ const r=document.documentElement.style;r.setProperty('--apph',h+'px');r.setProperty('--gap','0px');
+ if(gap)r.setProperty('--navpad',`max(4px, calc(env(safe-area-inset-bottom) - ${gap}px))`);else r.removeProperty('--navpad');
+ const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 38 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
 fixAppHeight();addEventListener('resize',fixAppHeight);addEventListener('orientationchange',()=>setTimeout(fixAppHeight,300));
 
 {
