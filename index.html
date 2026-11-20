@@ -393,7 +393,7 @@ function cleanPhoto(p){if(!p||typeof p!=='object'||typeof p.id!=='string'||!p.id
  if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;if(typeof p.pin==='string'&&p.pin)o.pin=p.pin.slice(0,120);if(typeof p.pinPlace==='string'&&p.pinPlace)o.pinPlace=str(p.pinPlace,80);return o}
 function cleanNotes(n){const o={};if(n&&typeof n==='object')for(const k of Object.keys(n).slice(0,5000))if(typeof n[k]==='string')o[str(k,200)]=n[k].slice(0,20000);return o}
 function cleanSettings(x){const o={};if(!x||typeof x!=='object')return o;if(typeof x.name==='string')o.name=str(x.name,60);
- if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;if(x.en===true)o.en=true;
+ if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;if(x.cl3===true)o.cl3=true;
  const flags=(v,onlyTrue)=>{const r={};if(v&&typeof v==='object')for(const k of Object.keys(v).slice(0,2000))if(typeof v[k]==='boolean'&&(!onlyTrue||v[k]))r[str(k,120)]=v[k];return r};
  if(x.transit)o.transit=flags(x.transit);if(x.hideJ)o.hideJ=flags(x.hideJ,true);return o}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -436,9 +436,10 @@ function countryAt(lat,lon){if(!GEO)return null;for(const f of GEO.f){const b=f.
  let best=null,bd=4.5;for(const cc in GEO.m){const ll=GEO.m[cc].ll;if(!ll)continue;const d=Math.hypot(ll[0]-lat,(ll[1]-lon)*Math.cos(lat*Math.PI/180));if(d<bd){bd=d;best=cc}}return best}
 /* ---------- online reverse geocode (city names) ---------- */
 const GC={};
+const BDC=(lat,lon,lang,signal)=>fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&localityLanguage=${lang}`,{signal}).then(r=>r.json());
 async function geocode(lat,lon){const k=lat.toFixed(2)+','+lon.toFixed(2);if(GC[k])return GC[k];
  const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),7000);
- try{const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&localityLanguage=en`,{signal:ctl.signal});const j=await r.json();
+ try{let j=await BDC(lat,lon,'en',ctl.signal);if(j.countryCode&&j.countryCode.toUpperCase()===homeCC())j=await BDC(lat,lon,'zh-Hant',ctl.signal).catch(()=>j);
   return GC[k]={cc:j.countryCode||null,city:j.city||j.locality||j.principalSubdivision||''}}catch(e){return GC[k]={cc:null,city:''}}finally{clearTimeout(to)}}
 /* ---------- thumbnails ---------- */
 async function thumb(file,max=420){let src;try{src=await createImageBitmap(file)}catch(e){src=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file)}).catch(()=>null)}
@@ -573,9 +574,17 @@ taj:['#8f86c8','M22 30q10-22 20 0zM32 6v4M20 30h24v28H20zM28 58V46q4-6 8 0v12M8 
 mosque:['#4f8fa8','M16 34q16-24 32 0zM32 10V4M14 34h36v24H14zM8 58V16l2-6 2 6v42M52 58V16l2-6 2 6v42M4 58h56M22 46q4-8 8 0M34 46q4-8 8 0'],
 petronas:['#7a8a9a','M17 62V22l4-4 4 4v40M17 22l4-14 4 14M39 62V22l4-4 4 4v40M39 22l4-14 4 14M21 8V2M43 8V2M25 36h14M25 40h14M13 62h38'],
 alishan:['#4f9a5f','M2 52l14-16 10 10 10-14 26 20M32 62V30M32 30q-12-1-15-10q8 3 15 0q-2-9 3-14q5 6 3 14q7 3 13 0q-3 9-19 10M24 62q-1-10 4-14M40 62q1-10-4-14M4 62h56'],
+sunmoon:['#4f8fb8','M2 46l14-14 10 8 12-14 24 20M38 26V9M34 13h8M33 18h10M32 23h12M38 9V4M2 54q8-3 15 0t15 0t15 0t15 0M8 60q6-2 12 0t12 0t12 0t12 0'],
+taroko:['#6f9a7a','M2 62V6q6 10 4 22t6 34M62 62V4q-6 12-3 24t-7 34M26 62q4-8 8-10t6-10M8 30h12M10 30q4-5 8 0M11 30v6h6v-6M14 36v14'],
+jiufen:['#d0583c','M4 20q28-10 56 0M8 20v40M56 20v40M4 26h56M8 60h48M18 30v3M16 33h4q2 4 0 8h-4q-2-4 0-8M32 30v3M30 33h4q2 4 0 8h-4q-2-4 0-8M46 30v3M44 33h4q2 4 0 8h-4q-2-4 0-8M20 60V48h24v12'],
+yehliu:['#b9925a','M22 62q-2-10 4-14q-4-6 0-14q4-10 14-10q10 2 10 12q0 8-6 10q-4 2-4 6q2 6 0 10zM4 62h56M30 30q4-3 8 0M2 56q6-3 12 0M50 56q6-3 12 0'],
+lighthouse:['#4a7fb8','M26 62l3-40h6l3 40zM27 22h10v-6H27zM29 16q3-6 6 0M24 62h16M28 34h8M27.5 46h9M10 14l14 4M54 14l-14 4M4 62q10-4 20 0M40 62q10-4 20 0'],
+chihkan:['#c0503c','M8 30q24-12 48 0M4 30l4-2M60 30l-4-2M14 30v10h36V30M10 44q22-10 44 0M14 44v16h36V44M28 60V50h8v10M6 60h52M26 24q6-6 12 0'],
+gaomei:['#5f9fb0','M20 60V22M20 22l-10-12M20 22l14-2M20 22l-4 14M46 60V30M46 30l-8-9M46 30l11-1M46 30l-3 11M2 60q15-3 30 0t30 0'],
+temple:['#c9583c','M6 26q26-10 52 0M2 22q4 2 6 4M62 22q-4 2-6 4M10 26h44v6H10zM14 32v26M50 32v26M8 58h48M26 58V44h12v14M24 18q8-8 16 0M32 10V6'],
 kh85:['#5a7fb0','M20 62V14h8v20h8V14h8v48M28 34l4-10 4 10M32 24V6M16 62h32M20 22h8M36 22h8'],
 };
-const LMK_WIDE=new Set(['fuji','matterhorn','opera','goldengate','colosseum','brandenburg','gyeongbok','mbs','pyramids','taj','mosque','torii','alishan']);
+const LMK_WIDE=new Set(['sunmoon','taroko','jiufen','yehliu','chihkan','gaomei','temple','fuji','matterhorn','opera','goldengate','colosseum','brandenburg','gyeongbok','mbs','pyramids','taj','mosque','torii','alishan']);
 const CC_LMK={JP:'fuji',FR:'eiffel',CH:'matterhorn',AU:'opera',US:'liberty',AE:'burj',GB:'bigben',IT:'colosseum',DE:'brandenburg',NL:'windmill',ES:'sagrada',KR:'gyeongbok',TH:'chedi',SG:'mbs',EG:'pyramids',IN:'taj',TR:'mosque',MY:'petronas',TW:'t101'};
 const CITY_LMK=(()=>{const m={},a=(k,...ns)=>ns.forEach(n=>m[n]=k);
  a('eiffel','paris');a('matterhorn','zermatt');a('tokyotower','tokyo','minato','chiyoda','chuo','shinjuku','shibuya','taito','sumida','toshima','koto','shinagawa');
@@ -583,9 +592,11 @@ const CITY_LMK=(()=>{const m={},a=(k,...ns)=>ns.forEach(n=>m[n]=k);
  a('opera','sydney');a('liberty','new york','manhattan');a('goldengate','san francisco');a('burj','dubai');a('t101','taipei','台北','臺北','台北市','臺北市');
  a('bigben','london','westminster','city of westminster');a('colosseum','rome','roma');a('pisa','pisa');a('brandenburg','berlin');a('windmill','amsterdam');a('sagrada','barcelona');
  a('gyeongbok','seoul');a('chedi','bangkok');a('mbs','singapore');a('pyramids','cairo','giza');a('taj','agra');a('mosque','istanbul');a('petronas','kuala lumpur');
- a('alishan','alishan','阿里山');a('kh85','kaohsiung','高雄','高雄市');return m})();
+ a('alishan','alishan','阿里山','嘉義','阿里山鄉');a('kh85','kaohsiung','高雄');a('t101','台北');a('sunmoon','日月潭','魚池','南投');a('taroko','太魯閣','秀林','花蓮');a('jiufen','九份','瑞芳','新北');
+ a('yehliu','野柳','萬里');a('lighthouse','墾丁','鵝鑾鼻','恆春','屏東');a('chihkan','台南','tainan');a('gaomei','台中','高美','清水','taichung');a('temple','萬華','龍山寺','鹿港','彰化');return m})();
+const TW_LMK=['t101','sunmoon','alishan','taroko','jiufen','lighthouse','chihkan','gaomei','yehliu','temple','kh85'];
 const cityKey=c=>String(c||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[-\s]*(city|shi|-ku|ku|prefecture|metropolis|special city|township)$/,'').replace(/^(city of )/,'').trim();
-const lmkOfCity=c=>CITY_LMK[cityKey(c)]||CITY_LMK[String(c||'').trim()]||null;
+const lmkOfCity=c=>{const r=String(c||'').trim(),z=r.replace(/臺/g,'台');return CITY_LMK[cityKey(r)]||CITY_LMK[r]||CITY_LMK[z]||CITY_LMK[z.replace(/(市|縣|鄉|鎮|區)$/,'')]||null};
 const lmkSVG=(k,cls)=>{const [col,d]=LMK[k];return `<svg class="${cls}" viewBox="0 0 64 64" aria-hidden="true"><path d="${d}" fill="${col}" stroke="${col}"/></svg>`};
 /* faint collage of the visited countries' landmarks behind a passport page */
 const WM_SLOTS=[[4,9,36],[60,6,30],[6,36,34],[60,32,32],[4,62,36],[52,62,40],[34,20,26]];
@@ -595,7 +606,7 @@ function wmHTML(keys,i){if(!keys.length)return'';
  return `<div class="wm" aria-hidden="true">${r.map((k,j)=>{const [l,t,w]=WM_SLOTS[j];return `<div style="left:${l}%;top:${t}%;width:${LMK_WIDE.has(k)?w:w*.7}%">${lmkSVG(k,'wmi')}</div>`}).join('')}</div>`}
 /* a hand-drawn landmark with a watercolor splash, for the map */
 function sketchHTML(k,label){const [col,d]=LMK[k];return `<div class="sk"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="36" cy="42" rx="25" ry="18" fill="${col}" fill-opacity=".5" filter="url(#skwc)"/><path d="${d}" fill="none" stroke="#2b2b2b" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round" filter="url(#skink)"/></svg><span>${esc(label)}</span></div>`}
-function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const WMK=[...new Set(A.filter(t=>!t.transit).map(t=>CC_LMK[t.cc]).filter(Boolean))],WMD=(()=>{const s=new Set(D.map(t=>lmkOfCity(t.cities[0])).filter(Boolean));if(homeCC()==='TW'||!homeCC())['t101','alishan','kh85'].forEach(k=>s.add(k));else if(CC_LMK[homeCC()])s.add(CC_LMK[homeCC()]);return[...s]})();const per=WIDEQ.matches?6:window.innerWidth>=700?9:6;const pages=[];
+function renderPass(){const T=trips(),A=abroad(T),D=domestic(T);const WMK=[...new Set(A.filter(t=>!t.transit).map(t=>CC_LMK[t.cc]).filter(Boolean))],WMD=(()=>{const s=new Set(D.map(t=>lmkOfCity(t.cities[0])).filter(Boolean));if(homeCC()==='TW'||!homeCC())TW_LMK.forEach(k=>s.add(k));else if(CC_LMK[homeCC()])s.add(CC_LMK[homeCC()]);return[...s]})();const per=WIDEQ.matches?6:window.innerWidth>=700?9:6;const pages=[];
  for(let i=0;i<Math.max(1,Math.ceil(A.length/per));i++)pages.push({h:'VISAS · 簽證',l:A.slice(i*per,i*per+per)});
  for(let i=0;i<Math.ceil(D.length/per);i++)pages.push({h:'DOMESTIC · 國內紀念章',l:D.slice(i*per,i*per+per),d:1});
  PAGES=[`<div class="page cover-page"><button class="twc-box" id="coverBtn" aria-label="翻開護照">${coverHTML()}<div class="cover-hint">${T.length?'向左翻開護照 ←':'按右上角「＋ 新增」開始蓋章'}</div></button></div>`,...pages.map((P,i)=>{const pg=P.l;return `<div class="page paper${P.d?' dom':''}">${wmHTML(P.d?WMD:WMK,i)}<div class="page-h"><span>${P.h}</span><span>${String(i+1).padStart(2,'0')}</span></div>
@@ -658,7 +669,7 @@ function openTrip(key,back){const t=trips().find(x=>x.key===key);if(!t)return;$(
  const sr=$('#showRoute');if(sr)sr.onclick=()=>{FOCUS_J=t.jid;closeSheet();go('map')};
  $$('#sheetBody .photos img').forEach(im=>im.onclick=()=>viewer(ph,+im.dataset.i,key));
  $('#saveTrip').onclick=async()=>{NOTES[key]=$('#diary').value;const cs=$('#city').value.split(/[、,，]/).map(s=>s.trim()).filter(Boolean);
-  if(cs.join()!==t.cities.join()){t.photos.forEach((p,i)=>p.city=cs[0]||'');}await save();closeSheet();renderAll();toast('已儲存')};
+  if(cs.join()!==t.cities.join()){const old=t.cities;if(cs.length===old.length){const m={};old.forEach((c,i)=>m[c]=cs[i]);t.photos.forEach(p=>{if(p.city in m)p.city=m[p.city]})}else t.photos.forEach(p=>{if(!cs.includes(p.city)&&(p.lat==null||!p.city))p.city=cs[0]||''})}await save();closeSheet();renderAll();toast('已儲存')};
  let armed=false;$('#delTrip').onclick=async e=>{if(!armed){armed=true;e.target.textContent='再按一次確認刪除';return}
   const ids=new Set(t.photos.map(p=>p.id));PHOTOS=PHOTOS.filter(p=>!ids.has(p.id));delete NOTES[key];await save();closeSheet();renderAll();toast('已刪除')}}
 function viewer(list,i,key){const v=$('#viewer'),img=$('#vImg'),cnt=$('#vCnt');let x0=null;
@@ -705,17 +716,17 @@ const kStyle=cc=>{const z=LMAP?LMAP.getZoom():2,c=inkOf(cc);return{color:c,weigh
 function restyle(){if(!LMAP)return;const z=LMAP.getZoom();showRoutes();LC.forEach(l=>l.setStyle(cStyle()));LCITY.forEach(([l,cc])=>l.setStyle(kStyle(cc)));
  LMAP.getContainer().classList.toggle('show-lbl',z>=5);if(LSK){const w=z>=SK_Z;if(w&&!LMAP.hasLayer(LSK))LSK.addTo(LMAP);else if(!w&&LMAP.hasLayer(LSK))LSK.remove();if(w){const shown=[];for(const [ll,m] of SKM){const el=m.getElement();if(!el)continue;const p=LMAP.latLngToContainerPoint(ll),hit=shown.some(q=>Math.abs(q.x-p.x)<74&&Math.abs(q.y-p.y)<84);el.style.display=hit?'none':'';if(!hit)shown.push(p)}}}LMAP.getContainer().classList.toggle('far',z<4)}
 /* accurate boundaries from OpenStreetMap (Nominatim), fetched once per place and kept on the phone */
-async function nomi(lat,lon,zoom,th){const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
- try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${(+lat).toFixed(2)}&lon=${(+lon).toFixed(2)}&zoom=${zoom}&polygon_geojson=1&polygon_threshold=${th}&accept-language=en`,{signal:ctl.signal});if(!r.ok)return null;return await r.json()}catch(e){return null}finally{clearTimeout(to)}}
+async function nomi(lat,lon,zoom,th,lang='en'){const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
+ try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${(+lat).toFixed(2)}&lon=${(+lon).toFixed(2)}&zoom=${zoom}&polygon_geojson=1&polygon_threshold=${th}&accept-language=${lang}`,{signal:ctl.signal});if(!r.ok)return null;return await r.json()}catch(e){return null}finally{clearTimeout(to)}}
 async function nomiSearch(q,cc){const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
- try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&countrycodes=${cc.toLowerCase()}&polygon_geojson=1&polygon_threshold=0.002&limit=1&accept-language=en`,{signal:ctl.signal});if(!r.ok)return null;const j=await r.json();return j[0]||{}}catch(e){return null}finally{clearTimeout(to)}}
+ try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&countrycodes=${cc.toLowerCase()}&polygon_geojson=1&polygon_threshold=0.002&limit=1&accept-language=${cc===homeCC()?'zh-TW':'en'}`,{signal:ctl.signal});if(!r.ok)return null;const j=await r.json();return j[0]||{}}catch(e){return null}finally{clearTimeout(to)}}
 async function ensureShapes(countries,cities,queries=[]){if(SHAPE_BUSY||!navigator.onLine)return;
  const todo=[...countries.filter(c=>!SHAPES['c:'+c.cc]).map(c=>({...c,kind:'c'})),...cities.filter(c=>!SHAPES['g:'+c.k]).map(c=>({...c,kind:'g'})),...queries.filter(q=>!SHAPES['g:'+q.k]).map(q=>({...q,kind:'q'}))];if(!todo.length)return;
  let rebuild=false;
  SHAPE_BUSY=true;let n=0;
  for(const it of todo){n++;$('#mapHint').textContent=`正在下載國家與城市的邊界 ${n}/${todo.length}（只需要一次）…`;
   if(it.kind==='q'){const j=await nomiSearch(it.city,it.cc);if(j){SHAPES['g:'+it.k]=j.lat?{geo:j.geojson&&/Polygon/.test(j.geojson.type)?j.geojson:null,name:it.city,lat:+j.lat,lon:+j.lon}:{geo:null,name:it.city,lat:null};DB.set('shapes',SHAPES);rebuild=true}await sleep(1100);continue}
-  const j=await nomi(it.lat,it.lon,it.kind==='c'?3:10,it.kind==='c'?.02:.002);
+  const j=await nomi(it.lat,it.lon,it.kind==='c'?3:10,it.kind==='c'?.02:.002,it.cc&&it.cc===homeCC()?'zh-TW':'en');
   if(j&&j.geojson){const ok=it.kind!=='c'||(j.address?.country_code||'').toUpperCase()===it.cc;
    SHAPES[(it.kind==='c'?'c:'+it.cc:'g:'+it.k)]=ok&&/Polygon/.test(j.geojson.type)?{geo:j.geojson,name:j.name||''}:{geo:null,name:j.name||''};
    DB.set('shapes',SHAPES);if($('#v-map').classList.contains('on'))drawLayers()}
@@ -727,12 +738,12 @@ function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDAT
  for(const cc of Object.keys(vis)){const sh=SHAPES['c:'+cc];
   if(sh&&sh.geo)LC.push(L.geoJSON(sh.geo,{style:cStyle,coordsToLatLng:c=>L.latLng(c[1],c[0])}).addTo(LLAYER));
   else{const f=GEO.f.find(x=>x.a===cc);if(f)LC.push(L.polygon(f.p.map(p=>p.map(fixRing)),cStyle()).addTo(LLAYER))}}
- for(const g of groups){const sh=SHAPES['g:'+g.k];const label=(sh&&sh.name)||g.city||'';let lay;const ck=g.cc===homeCC()?g.k:g.cc;
+ for(const g of groups){const sh=SHAPES['g:'+g.k];const label=(g.dup?(sh&&sh.name)||g.city:g.city||(sh&&sh.name))||'';let lay;const ck=g.cc===homeCC()?g.k:g.cc;
   if(sh&&sh.geo)lay=L.geoJSON(sh.geo,{style:()=>kStyle(ck)});else lay=L.circle([g.lat,g.lon],Object.assign({radius:7000},kStyle(ck)));
   lay.addTo(LLAYER);LCITY.push([lay,ck]);
   const lk=lmkOfCity(g.city)||lmkOfCity(label);if(lk){if(!skDone.has(lk)){skDone.add(lk);const m=L.marker([g.lat,g.lon],{interactive:false,keyboard:false,zIndexOffset:-500,icon:L.divIcon({className:'',html:sketchHTML(lk,label||g.city),iconSize:[90,84],iconAnchor:[45,112]})}).addTo(LSK);SKM.push([[g.lat,g.lon],m])}continue}
   if(label)L.tooltip({permanent:true,direction:'center',className:'clbl',interactive:false}).setLatLng([g.lat,g.lon]).setContent(esc(label)).addTo(LLAYER)}
- for(const g of groups){const ps=g.ps,t=tripOf.get(ps[0].id),n=ps.length,a=ps[0].t,b=ps[n-1].t,label=(SHAPES['g:'+g.k]?.name)||g.city||cname(g.cc);
+ for(const g of groups){const ps=g.ps,t=tripOf.get(ps[0].id),n=ps.length,a=ps[0].t,b=ps[n-1].t,label=(g.dup?SHAPES['g:'+g.k]?.name||g.city:g.city||SHAPES['g:'+g.k]?.name)||cname(g.cc);
   const icon=L.divIcon({className:'',html:`<div class="pin${n===1?' one':''}" style="background:${inkOf(g.cc===homeCC()?g.k:g.cc)}">${n>99?'99+':n}</div>`,iconSize:n===1?[22,22]:[30,30],iconAnchor:n===1?[11,30]:[15,40]});
   const th=ps.filter(p=>p.th).slice(0,4).map(p=>`<img src="${esc(safeImg(p.th))}" alt="">`).join('');
   L.marker([g.lat,g.lon],{icon}).bindPopup(`<div class="pop"><b>${esc(label)}</b><div class="s">${esc(cname(g.cc))} · ${zdate(a)}${dayStart(b)>dayStart(a)?' – '+zdate(b):''} · ${n} 張</div>${th?`<div class="ph">${th}</div>`:''}${ps.some(p=>p.th)?`<button data-g="${esc(g.k)}">看${esc(label)}的 ${ps.filter(p=>p.th).length} 張照片</button>`:''}${t?`<button class="alt" data-k="${esc(t.key)}">打開這枚${t.domestic?'紀念章':'入境章'}</button>`:''}</div>`,{maxWidth:230}).addTo(LLAYER)}
@@ -773,8 +784,12 @@ async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T)
    if(gb)gb.onclick=()=>{LMAP.closePopup();const g=MAPDATA&&MAPDATA.groups.find(x=>x.k===gb.dataset.g);if(g)placePhotos(g)}})}
  const tripOf=new Map();T.forEach(t=>t.photos.forEach(p=>tripOf.set(p.id,t)));
  const gm=new Map();const homeIn=new Set(T.filter(t=>!t.domestic).flatMap(t=>t.photos.filter(p=>p.cc===homeCC())));
- for(const p of PHOTOS){if(p.lat==null||!p.cc||homeIn.has(p))continue;const k=p.city?p.cc+'|'+p.city:p.cc+'|'+(Math.round(p.lat*20)/20)+','+(Math.round(p.lon*20)/20);(gm.get(k)||gm.set(k,[]).get(k)).push(p)}
- const groups=[...gm].map(([k,ps])=>{ps.sort((a,b)=>a.t-b.t);return{k,ps,cc:ps[0].cc,city:ps[0].city,lat:ps.reduce((s,p)=>s+p.lat,0)/ps.length,lon:ps.reduce((s,p)=>s+p.lon,0)/ps.length}});
+ const km=(a,b,c,d)=>Math.hypot((a-c)*111,(b-d)*111*Math.cos(a*Math.PI/180));const cl=[];
+ for(const p of [...PHOTOS].sort((a,b)=>a.t-b.t)){if(p.lat==null||!p.cc||homeIn.has(p))continue;const city=p.city||'';
+  let c=cl.find(c=>c.cc===p.cc&&c.city===city&&km(c.lat,c.lon,p.lat,p.lon)<12);if(!c){c={cc:p.cc,city,lat:p.lat,lon:p.lon,ps:[]};cl.push(c)}
+  c.ps.push(p);c.lat=c.ps.reduce((s,q)=>s+q.lat,0)/c.ps.length;c.lon=c.ps.reduce((s,q)=>s+q.lon,0)/c.ps.length}
+ cl.forEach(c=>c.dup=!!c.city&&cl.some(o=>o!==c&&o.cc===c.cc&&o.city===c.city));
+ const groups=cl.map(c=>({dup:c.dup,k:c.cc+'|'+c.city+'|'+(Math.round(c.lat*10)/10)+','+(Math.round(c.lon*10)/10),ps:c.ps,cc:c.cc,city:c.city,lat:c.lat,lon:c.lon}));
  // manually added places (no GPS) are placed by looking up their name
  const qm=new Map();for(const p of PHOTOS){if(p.lat!=null||!p.cc||!p.city||homeIn.has(p))continue;const k='q|'+p.cc+'|'+p.city;(qm.get(k)||qm.set(k,[]).get(k)).push(p)}
  const queries=[];for(const [k,ps] of qm){const sh=SHAPES['g:'+k];if(sh&&sh.lat!=null){ps.sort((a,b)=>a.t-b.t);groups.push({k,ps,cc:ps[0].cc,city:ps[0].city,lat:sh.lat,lon:sh.lon})}else if(!sh)queries.push({k,cc:ps[0].cc,city:ps[0].city})}
@@ -1066,16 +1081,16 @@ $('#nameIn').onchange=async e=>{SETTINGS.name=e.target.value.trim();await save()
 function go(v){if(FS&&v!=='map')setFS(false);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$('#imp').style.display=$('#manual2').style.display=v==='pass'?'':'none';if(v==='map')renderMap()}
 $$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2400)}
-/* one-time: switch stored city names to English (re-looks up each photo's place; diary notes and pinned photos follow) */
-async function migrateCitiesEn(){if(SETTINGS.en||!navigator.onLine)return;const CJK=/[㐀-鿿]/;
- const todo=PHOTOS.filter(p=>p.lat!=null&&p.city&&CJK.test(p.city)&&!p.fixed);const S=snap(),votes={};let fail=0;
- for(const p of todo){const g=await geocode(p.lat,p.lon);if(!g.city){fail++;continue}if(CJK.test(g.city))continue;
-  (votes[p.city]=votes[p.city]||{})[g.city]=(votes[p.city][g.city]||0)+1;p.city=g.city;await sleep(60)}
+/* one-time: every photo with GPS gets the city it was really taken in (abroad in English, at home in Chinese); photos edited by hand stay as they are */
+async function migrateCities(){if(SETTINGS.cl3||!navigator.onLine)return;
+ const todo=PHOTOS.filter(p=>p.lat!=null&&!p.fixed);const S=snap(),votes={};let fail=0,ch=0;
+ for(const p of todo){const fresh=!GC[p.lat.toFixed(2)+','+p.lon.toFixed(2)];const g=await geocode(p.lat,p.lon);if(!g.city){fail++;continue}
+  if(g.city!==p.city){if(p.city)(votes[p.city]=votes[p.city]||{})[g.city]=(votes[p.city][g.city]||0)+1;p.city=g.city;ch++}if(fresh)await sleep(60)}
  const map={};for(const o in votes){map[o]=Object.entries(votes[o]).sort((a,b)=>b[1]-a[1])[0][0]}
- for(const p of PHOTOS){if(p.city&&map[p.city])p.city=map[p.city];if(p.pinPlace&&map[p.pinPlace]){const o=p.pinPlace,n=map[o];if(p.pin&&p.pin.startsWith('D-'+o+'-'))p.pin='D-'+n+'-'+p.pin.slice(3+o.length);p.pinPlace=n}}
- newTrips(S);if(!fail)SETTINGS.en=true;
- if(!SHAPES_LOADED){SHAPES=(await DB.get('shapes'))||{};SHAPES_LOADED=true}for(const k of Object.keys(SHAPES))if(k.startsWith('g:'))delete SHAPES[k];await DB.set('shapes',SHAPES);
- await save();if(todo.length){renderAll();toast('城市名稱已改成英文')}}
+ for(const p of PHOTOS){if(p.lat==null&&!p.fixed&&p.city&&map[p.city])p.city=map[p.city];if(p.pinPlace&&map[p.pinPlace]){const o=p.pinPlace,n=map[o];if(p.pin&&p.pin.startsWith('D-'+o+'-'))p.pin='D-'+n+'-'+p.pin.slice(3+o.length);p.pinPlace=n}}
+ newTrips(S);if(!fail)SETTINGS.cl3=true;
+ if(ch){if(!SHAPES_LOADED){SHAPES=(await DB.get('shapes'))||{};SHAPES_LOADED=true}for(const k of Object.keys(SHAPES))if(k.startsWith('g:'))delete SHAPES[k];await DB.set('shapes',SHAPES)}
+ await save();if(ch){renderAll();toast(`已依照片定位校正 ${ch} 張照片的城市`)}}
 function renderAll(){renderPass();renderStats();if($('#v-map').classList.contains('on'))renderMap()}
 let rw=innerWidth;addEventListener('resize',()=>{if(!WIDEQ.matches&&(innerWidth>=700)!==(rw>=700))renderPass();rw=innerWidth});
 /* ---------- boot ---------- */
@@ -1088,7 +1103,7 @@ let rw=innerWidth;addEventListener('resize',()=>{if(!WIDEQ.matches&&(innerWidth>
  $('#homeBox').innerHTML=picker('home',homeCC());bindPicker('home');
  $('#home').addEventListener('change',async()=>{SETTINGS.home=$('#home').value;await save();renderAll();toast(`居住地設為${cname(SETTINGS.home)}，${cname(SETTINGS.home)}不會再蓋章`)});
  $('#homeNone').onclick=async()=>{SETTINGS.home='';$('#homeq').value='';$('#home').value='';await save();renderAll();toast('已取消居住地，每個國家都會蓋章')};
- renderAll();migrateCitiesEn().catch(()=>{});
+ renderAll();migrateCities().catch(()=>{});
  if(!NATIVE&&'serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})})();
 /* ---------- Android app (Capacitor): gallery picker that keeps GPS, saving & sharing files ---------- */
 const CAPX=window.Capacitor,NATIVE=!!(CAPX&&CAPX.isNativePlatform&&CAPX.isNativePlatform());
