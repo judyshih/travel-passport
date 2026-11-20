@@ -20,6 +20,7 @@
 @font-face{font-family:"Barlow Condensed";font-weight:600;font-display:swap;src:url(fonts/barlow-condensed-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:"Barlow Condensed";font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:"Cormorant Garamond";font-weight:600;font-display:swap;src:url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2")}
+#busy,#cer,#viewer,.scrim,#v-map .mapwrap.fs{bottom:auto;height:var(--apph,100%)}.sheet{bottom:calc(0px - var(--gap,0px))}
 </style>
 <style>
 /* VOICE: a real passport — Taiwan-passport green cover, gold foil, guilloche paper, inked stamps
@@ -34,7 +35,7 @@ html,body{margin:0;height:100%}html{background-color:var(--navy2)}html[data-bg=i
 body{background:var(--navy);color:var(--ink);font:16px/1.5 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;overflow:hidden}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-#app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
+#app{position:fixed;top:0;left:0;right:0;height:var(--apph,100%);display:grid;grid-template-rows:auto 1fr auto}
 header{padding:calc(var(--safe-t) + 10px) 18px 10px;color:var(--gold2);display:flex;align-items:center;gap:10px}
 header h1{font:600 clamp(19px,5.6vw,24px)/1.15 "Cormorant Garamond",serif;letter-spacing:.04em;margin:0;flex:1}
 header small{display:block;font:500 12px "Barlow Condensed",sans-serif;color:#9db8aa;letter-spacing:.12em}
@@ -120,7 +121,7 @@ nav button.on{color:var(--gold2)}
 .twohint{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);z-index:4;text-align:center;color:#fff;background:rgba(0,0,0,.55);padding:16px;border-radius:12px;font-size:16px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .2s}
 .twohint small{font-weight:400;font-size:13px}.twohint.on{opacity:1}
 #v-map .mapwrap.fs{position:fixed;inset:0;z-index:25;border-radius:0;order:0}
-#v-map .mapwrap.fs #lmap{height:100vh!important;min-height:0}
+#v-map .mapwrap.fs #lmap{height:var(--apph,100vh)!important;min-height:0}
 #v-map .mapwrap.fs .leaflet-top{top:var(--safe-t)}#v-map .mapwrap.fs .leaflet-bottom{bottom:var(--safe-b)}
 body.mapfs .fsbtn{position:fixed;top:calc(var(--safe-t) + 10px);right:calc(12px + env(safe-area-inset-right));margin:0;z-index:26}
 .leaflet-container{font:14px/1.4 -apple-system,"PingFang TC",sans-serif}
@@ -394,6 +395,12 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 <div class="toast" id="toast"></div>
 
 <script>
+/* iOS home-screen apps sometimes report a viewport shorter than the screen and leave an empty band at the bottom: size the app to the real screen */
+function fixAppHeight(){let h=window.innerHeight;const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+ if(ios&&sa){const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height);if(sh>h&&sh-h<160)h=sh}
+ document.documentElement.style.setProperty('--apph',h+'px');document.documentElement.style.setProperty('--gap',Math.max(0,h-window.innerHeight)+'px')}
+fixAppHeight();addEventListener('resize',fixAppHeight);addEventListener('orientationchange',()=>setTimeout(fixAppHeight,300));
+
 {
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const safeImg=v=>typeof v==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(v)?v:'';
