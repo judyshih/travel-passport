@@ -101,7 +101,7 @@ nav button.on{color:var(--gold2)}
 .card{background:var(--paper);border-radius:12px;padding:14px;margin-bottom:12px}
 .card h2{font-size:17px;margin:0 0 8px}
 .mapwrap{overflow:auto;border-radius:10px;background:#cfe0e3;-webkit-overflow-scrolling:touch;position:relative;isolation:isolate}
-#lmap{height:min(62vh,560px);width:100%;background:#d7e6ea}
+#lmap{height:min(52vh,520px);width:100%;background:#d7e6ea}
 #v-map .card{display:flex;flex-direction:column;position:relative}
 #v-map .zoom{order:1;margin:0 0 8px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}#v-map .zoom .chip{flex:none}
 #v-map .legend{order:2;margin:0 0 10px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#v-map .legend>*{flex:none}
@@ -330,8 +330,8 @@ textarea{min-height:120px;resize:vertical}
 </section>
 <section class="view" id="v-map">
 <div class="card"><h2 id="mapTitle">足跡地圖</h2>
-<div class="mapwrap" id="mapwrap"></div><button class="fsbtn" id="fsBtn" aria-label="全螢幕地圖">⛶ 全螢幕</button><div class="twohint" id="twoHint">用兩指移動地圖<br><small>或按「⛶ 全螢幕」用單指自由拖曳</small></div>
-<div class="maphint" id="mapHint">單指上下滑動頁面，兩指移動、縮放地圖；放大到國家的大小會出現飛行路線。</div><div class="zoom"><button class="chip" id="routeBtn">✈︎ 飛行路線</button><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
+<div class="mapwrap" id="mapwrap"></div><button class="fsbtn" id="fsBtn" aria-label="全螢幕地圖">⛶ 全螢幕</button><div class="twohint" id="twoHint"></div>
+<div class="maphint" id="mapHint">單指拖曳移動地圖、兩指縮放；要捲動頁面請滑地圖外面的地方。放大到國家的大小會出現飛行路線。</div><div class="zoom"><button class="chip" id="routeBtn">✈︎ 飛行路線</button><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
 <div class="legend" id="legend"></div></div>
 </section>
 <section class="view" id="v-stats"><div id="stats"></div></section>
@@ -732,7 +732,7 @@ async function ensureShapes(countries,cities,queries=[]){if(SHAPE_BUSY||!navigat
    SHAPES[(it.kind==='c'?'c:'+it.cc:'g:'+it.k)]=ok&&/Polygon/.test(j.geojson.type)?{geo:j.geojson,name:j.name||''}:{geo:null,name:j.name||''};
    DB.set('shapes',SHAPES);if($('#v-map').classList.contains('on'))drawLayers()}
   await sleep(1100)}
- SHAPE_BUSY=false;if(rebuild&&$('#v-map').classList.contains('on'))renderMap();$('#mapHint').textContent='單指上下滑動頁面，兩指移動、縮放地圖；放大到國家的大小會出現飛行路線。'}
+ SHAPE_BUSY=false;if(rebuild&&$('#v-map').classList.contains('on'))renderMap();$('#mapHint').textContent='單指拖曳移動地圖、兩指縮放；要捲動頁面請滑地圖外面的地方。放大到國家的大小會出現飛行路線。'}
 let MAPDATA=null;
 let LSK=null,SKM=[];const SK_Z=5;
 function drawLayers(){if(!LMAP||!MAPDATA)return;const {vis,groups,tripOf}=MAPDATA;LLAYER.clearLayers();LC=[];LCITY=[];if(!LSK)LSK=L.layerGroup();LSK.clearLayers();SKM=[];const skDone=new Set();
@@ -773,9 +773,9 @@ function showRoutes(){if(!LMAP||!LROUTE)return;const z=LMAP.getZoom(),want=z>=RO
 async function renderMap(){if(!GEO)return;const T=trips();const vis={};abroad(T).filter(t=>!t.transit).forEach(t=>vis[t.cc]=(vis[t.cc]||0)+1);const nd=new Set(domestic(T).map(t=>t.cities[0])).size;
  $('#mapTitle').textContent=`足跡地圖 · ${Object.keys(vis).length} 個國家${nd?` · 國內 ${nd} 個地方`:''}`;
  $('#legend').innerHTML=Object.keys(vis).sort((a,b)=>vis[b]-vis[a]).map(a=>`<button data-cc="${a}">${GEO.m[a]?.f||''} ${esc(cname(a))}${vis[a]>1?' ×'+vis[a]:''}</button>`).join('')||'<span>還沒有足跡，匯入照片開始吧</span>';
- try{await loadLeaflet()}catch(e){$('#mapHint').textContent='目前離線，先顯示簡易地圖；連上網路後可以兩指放大到城市。';LMAP=null;return renderSvgMap()}
+ try{await loadLeaflet()}catch(e){$('#mapHint').textContent='目前離線，先顯示簡易地圖；連上網路後可以放大到城市。';LMAP=null;return renderSvgMap()}
  if(!SHAPES_LOADED){SHAPES=(await DB.get('shapes'))||{};SHAPES_LOADED=true}
- if(!SHAPE_BUSY)$('#mapHint').textContent='單指上下滑動頁面，兩指移動、縮放地圖；放大到國家的大小會出現飛行路線。';
+ if(!SHAPE_BUSY)$('#mapHint').textContent='單指拖曳移動地圖、兩指縮放；要捲動頁面請滑地圖外面的地方。放大到國家的大小會出現飛行路線。';
  if(!LMAP||!document.getElementById('lmap')){$('#mapwrap').innerHTML='<div id="lmap"></div>';
   LMAP=L.map('lmap',{worldCopyJump:true,minZoom:1,maxZoom:18,zoomSnap:.5,tap:true}).setView([25,121],2);
   if(TOUCH)setupTwoFinger();
@@ -820,13 +820,10 @@ function placePhotos(g){const ph=g.ps.filter(p=>p.th),label=(SHAPES['g:'+g.k]?.n
  $$('#sheetBody .photos img').forEach(im=>im.onclick=()=>viewer(ph,+im.dataset.i,t&&t.key));if($('#ppTrip'))$('#ppTrip').onclick=()=>openTrip(t.key)}
 /* on phones: one finger scrolls the page, two fingers move/zoom the map; full screen = one-finger dragging */
 const TOUCH=matchMedia('(pointer: coarse)').matches;let FS=false,hintT;
-function setupTwoFinger(){const el=LMAP.getContainer();if(!FS)LMAP.dragging.disable();
- el.addEventListener('touchstart',e=>{if(FS)return;if(e.touches.length>1){LMAP.dragging.enable();$('#twoHint').classList.remove('on')}else LMAP.dragging.disable()},{passive:true,capture:true});
- let y0=null,x0=null;el.addEventListener('touchmove',e=>{if(FS||e.touches.length!==1)return;const t=e.touches[0];if(y0===null){y0=t.clientY;x0=t.clientX;return}
-  if(Math.abs(t.clientX-x0)>24&&Math.abs(t.clientX-x0)>Math.abs(t.clientY-y0)){$('#twoHint').classList.add('on');clearTimeout(hintT);hintT=setTimeout(()=>$('#twoHint').classList.remove('on'),1400)}},{passive:true});
- el.addEventListener('touchend',e=>{if(!e.touches.length){y0=x0=null;if(!FS)LMAP.dragging.disable()}},{passive:true})}
+/* one finger drags the map, two fingers zoom; the page scrolls from the area around the map */
+function setupTwoFinger(){LMAP.dragging.enable()}
 function setFS(on){FS=on;const w=$('#mapwrap');w.classList.toggle('fs',on);document.body.classList.toggle('mapfs',on);$('#fsBtn').textContent=on?'✕ 關閉全螢幕':'⛶ 全螢幕';
- if(LMAP){if(on||!TOUCH)LMAP.dragging.enable();else LMAP.dragging.disable();setTimeout(()=>LMAP.invalidateSize(),60)}}
+ if(LMAP){LMAP.dragging.enable();setTimeout(()=>LMAP.invalidateSize(),60)}}
 $('#fsBtn').onclick=()=>setFS(!FS);
 function fitAll(){if(!LMAP)return;if(LPTS.length)LMAP.fitBounds(LPTS,{padding:[36,36],maxZoom:10});else LMAP.setView([25,121],2)}
 $('#fitAll').onclick=fitAll;
