@@ -364,6 +364,7 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 <button class="fab fab2" id="manual2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16M7 16l1-4 8-8 3 3-8 8-4 1z"/></svg>手動蓋章</button>
 <button class="fab" id="imp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>匯入照片</button>
 <input type="file" id="file" accept="image/*" multiple hidden>
+<input type="file" id="gtk" accept=".zip,application/zip,.json,application/json,image/*" multiple hidden>
 
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
@@ -899,6 +900,50 @@ $('#file').onchange=async e=>{const files=[...e.target.files];e.target.value='';
   let ex={};try{ex=exif(await f.arrayBuffer())}catch(err){}
   const t=ex.t||f.lastModified||Date.now();recs.push({id:f.name+'|'+f.size+'|'+t,t,lat:ex.lat??null,lon:ex.lon??null,th:await thumb(f)})}
  processImport(recs)};
+/* ---------- Google Photos via Google Takeout: reads the .zip parts in place (no unzipping), keeps the location from each photo's .json ---------- */
+const IMG_RE=/\.(jpe?g|png|heic|heif|webp|gif)$/i,dirOf=n=>n.slice(0,n.lastIndexOf('/')+1),baseOf=n=>n.slice(n.lastIndexOf('/')+1);
+const MIME={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',heic:'image/heic',heif:'image/heif',webp:'image/webp',gif:'image/gif'};
+async function zipEntries(file){const size=file.size,tl=Math.min(size,70000),tail=new DataView(await file.slice(size-tl).arrayBuffer());let e=-1;
+ for(let i=tl-22;i>=0;i--)if(tail.getUint32(i,true)===0x06054b50){e=i;break}if(e<0)throw new Error('not a zip');
+ let n=tail.getUint16(e+10,true),cs=tail.getUint32(e+12,true),co=tail.getUint32(e+16,true);
+ if((co===0xFFFFFFFF||cs===0xFFFFFFFF||n===0xFFFF)&&e>=20&&tail.getUint32(e-20,true)===0x07064b50){const z64=Number(tail.getBigUint64(e-12,true)),z=new DataView(await file.slice(z64,z64+56).arrayBuffer());n=Number(z.getBigUint64(32,true));cs=Number(z.getBigUint64(40,true));co=Number(z.getBigUint64(48,true))}
+ const cd=new DataView(await file.slice(co,co+cs).arrayBuffer()),td=new TextDecoder(),out=[];let p=0;
+ while(p+46<=cd.byteLength&&cd.getUint32(p,true)===0x02014b50){const m=cd.getUint16(p+10,true);let csz=cd.getUint32(p+20,true),usz=cd.getUint32(p+24,true),off=cd.getUint32(p+42,true);const nl=cd.getUint16(p+28,true),xl=cd.getUint16(p+30,true),cl=cd.getUint16(p+32,true);
+  const name=td.decode(new Uint8Array(cd.buffer,p+46,nl));
+  if(usz===0xFFFFFFFF||csz===0xFFFFFFFF||off===0xFFFFFFFF){let q=p+46+nl;const qe=q+xl;while(q+4<=qe){const id=cd.getUint16(q,true),l=cd.getUint16(q+2,true);if(id===1){let r=q+4;if(usz===0xFFFFFFFF){usz=Number(cd.getBigUint64(r,true));r+=8}if(csz===0xFFFFFFFF){csz=Number(cd.getBigUint64(r,true));r+=8}if(off===0xFFFFFFFF)off=Number(cd.getBigUint64(r,true));break}q+=4+l}}
+  if(!name.endsWith('/'))out.push({name,m,csz,off,file});p+=46+nl+xl+cl}
+ return out}
+async function zipRead(en){if(en.raw)return en.raw;const h=new DataView(await en.file.slice(en.off,en.off+30).arrayBuffer()),st=en.off+30+h.getUint16(26,true)+h.getUint16(28,true),b=en.file.slice(st,st+en.csz);
+ if(en.m===0)return b;if(en.m!==8)throw new Error('unsupported');return await new Response(b.stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob()}
+function gpSheet(){sheet(`<h3>從 Google 相簿匯入</h3><div class="sub">直接連 Google 相簿拿不到拍攝地點，用 Google 官方的「Takeout 匯出」才會保留位置。</div>
+ <ol style="margin:10px 0 14px;padding-left:1.3em;line-height:1.7;font-size:15px">
+ <li>用瀏覽器打開 <b>takeout.google.com</b>，登入你的 Google 帳號</li>
+ <li>按「取消全選」，往下只勾「<b>Google 相簿</b>」</li>
+ <li>想分批的話，按「已包含所有相簿資料」，只勾某幾年（例如 Photos from 2019）</li>
+ <li>下一步：檔案類型選 <b>.zip</b>、大小選 <b>2 GB</b>，按「建立匯出作業」</li>
+ <li>收到 Google 的 Email 後下載 zip，回到這裡選檔案（可以一次選好幾個）</li></ol>
+ <div class="sub" style="margin-bottom:12px">App 只留下縮圖和地點，匯入完就可以把 zip 刪掉，不會一直占手機空間。手機空間不夠時，下載一個匯入一個再刪掉即可。</div>
+ <button class="btn" id="gpGo">選擇 Takeout 檔案</button>`);$('#gpGo').onclick=()=>{closeSheet();$('#gtk').click()}}
+$('#gtk').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;busy(true,'讀取 Takeout 檔案…');
+ try{const ents=[];for(const f of files){if(/\.zip$/i.test(f.name)||f.type==='application/zip'){try{ents.push(...await zipEntries(f))}catch(err){toast(`${f.name} 不是可讀的 zip 檔`)}}else ents.push({name:f.webkitRelativePath||f.name,raw:f})}
+  const imgs=new Map(),byDir=new Map();for(const en of ents){if(!IMG_RE.test(en.name))continue;imgs.set(en.name.toLowerCase(),en);const d=dirOf(en.name);(byDir.get(d)||byDir.set(d,[]).get(d)).push(en)}
+  const jsons=ents.filter(en=>/\.json$/i.test(en.name)&&!/(^|\/)(metadata|print-subscriptions|shared_album_comments|user-generated-memory-titles)[^/]*\.json$/i.test(en.name));
+  const have=new Set(PHOTOS.map(p=>p.id)),haveT=new Set(PHOTOS.map(p=>Math.round(p.t/1000))),recs=[];let nogps=0,dup=0,i=0;
+  for(const j of jsons){i++;if(i%5===1)busy(true,`讀取 Google 相簿 ${i}/${jsons.length}`);let m;try{m=JSON.parse(await (await zipRead(j)).text())}catch(err){continue}
+   if(!m||!m.photoTakenTime||!m.title||!IMG_RE.test(String(m.title)))continue;
+   const title=String(m.title),t=(+m.photoTakenTime.timestamp||0)*1000;if(!t)continue;const id='gp|'+title+'|'+t;if(have.has(id)){dup++;continue}if(haveT.has(Math.round(t/1000))){dup++;continue}
+   const d=dirOf(j.name),jb=baseOf(j.name).replace(/\.json$/i,'').replace(/\.s[a-z-]*$/i,'').replace(/\(\d+\)$/,''),list=byDir.get(d)||[];
+   const img=imgs.get((d+title).toLowerCase())||list.find(x=>baseOf(x.name)===jb)||list.find(x=>jb.length>=8&&baseOf(x.name).startsWith(jb.replace(/\.[^.]*$/,'')));
+   let g=m.geoData;if(!g||(!+g.latitude&&!+g.longitude))g=m.geoDataExif;let lat=g&&(+g.latitude||+g.longitude)?+g.latitude:null,lon=lat!=null?+g.longitude:null;
+   let blob=null;if(img){try{blob=await zipRead(img);const ext=(img.name.match(/\.([^.]+)$/)||[])[1]?.toLowerCase();if(MIME[ext])blob=new Blob([blob],{type:MIME[ext]})}catch(err){blob=null}}
+   if(lat==null&&blob){try{const ex=exif(await blob.slice(0,262144).arrayBuffer());if(ex.lat!=null){lat=ex.lat;lon=ex.lon}}catch(err){}}
+   if(lat==null){nogps++;continue}
+   let th='';if(blob){try{th=await thumb(blob)}catch(err){}}
+   have.add(id);recs.push({id,t,lat,lon,th})}
+  busy(false);
+  if(!recs.length){toast(nogps?`找到 ${nogps} 張照片，但都沒有位置資訊`:dup?'這些照片已經匯入過了':'沒有在檔案裡找到 Google 相簿的照片');return}
+  await processImport(recs);if(nogps)setTimeout(()=>toast(`另有 ${nogps} 張沒有位置資訊，已略過`),2600)}
+ catch(err){busy(false);toast('讀取失敗：'+(err&&err.message||err))}};
 /* shared by the web file picker and the Android gallery picker */
 let IMPORT_PIN=null;
 async function processImport(recs){if(IMPORT_PIN&&Date.now()-IMPORT_PIN.at<20*60e3)return importIntoStamp(recs,IMPORT_PIN);IMPORT_PIN=null;
@@ -991,8 +1036,9 @@ function askLocation(list,done){list.sort((a,b)=>a.t-b.t);
  $('#lskip').onclick=()=>{$('#sheetBody').onclick=null;closeSheet();done()}}
 $('#addBtn').onclick=()=>{unlockAudio();sheet(`<h3>新增入境章</h3><div class="sub">選一種方式</div>
  <button class="btn" id="mImp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/></svg>從照片匯入</button>
- <button class="btn alt" id="mMan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16M7 16l1-4 8-8 3 3-8 8-4 1z"/></svg>手動蓋章（沒有照片也可以）</button>`);
- $('#mImp').onclick=()=>{closeSheet();pickPhotos()};$('#mMan').onclick=()=>{$('#manual').click()}};
+ <button class="btn alt" id="mMan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16M7 16l1-4 8-8 3 3-8 8-4 1z"/></svg>手動蓋章（沒有照片也可以）</button>
+ <button class="btn alt" id="mGp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>從 Google 相簿匯入（Takeout）</button>`);
+ $('#mImp').onclick=()=>{closeSheet();pickPhotos()};$('#mGp').onclick=gpSheet;$('#mMan').onclick=()=>{$('#manual').click()}};
 $('#manual').onclick=$('#manual2').onclick=()=>{const today=new Date().toISOString().slice(0,10);
  sheet(`<h3>手動新增入境章</h3><div class="sub">適合沒有照片，或想補登以前的旅行。</div>
  <label for="mcq">國家／地區</label>${picker('mc','')}
