@@ -428,7 +428,7 @@ function fixAppHeight(){const h=window.innerHeight,ios=/iPhone|iPad|iPod/.test(n
  const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=ios&&sa&&sh>h&&sh-h<160?sh-h:0;
  const r=document.documentElement.style;r.setProperty('--apph',h+'px');r.setProperty('--gap','0px');
  if(gap)r.setProperty('--navpad',`max(4px, calc(env(safe-area-inset-bottom) - ${gap}px))`);else r.removeProperty('--navpad');
- const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 41 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
+ const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 42 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
 fixAppHeight();addEventListener('resize',fixAppHeight);addEventListener('orientationchange',()=>setTimeout(fixAppHeight,300));
 
 {
@@ -1205,15 +1205,19 @@ async function scrLoad(){const r=await fetch('scratch-map.json');const data=awai
    sh.path=new Path2D();sh.parts.forEach(p=>sh.path.addPath(p.path))}
   const m=GEO.m[sh.cc];sh.name=((m&&m.e)||sh.cc).toUpperCase();let lx,ly;if(m&&m.ll)[lx,ly]=sP(m.ll[1],m.ll[0]);
   if(lx==null||lx<sh.b[0]||lx>sh.b[2]||ly<sh.b[1]||ly>sh.b[3]){const big=sh.parts?sh.parts.reduce((a,p)=>(p.b[2]-p.b[0])*(p.b[3]-p.b[1])>(a.b[2]-a.b[0])*(a.b[3]-a.b[1])?p:a):null;const bb=big?big.b:sh.b;lx=(bb[0]+bb[2])/2;ly=(bb[1]+bb[3])/2}
-  sh.mb=sh.parts?sh.parts.reduce((a,p)=>(p.b[2]-p.b[0])*(p.b[3]-p.b[1])>(a[2]-a[0])*(a[3]-a[1])?p.b:a,sh.parts[0].b):sh.b;sh.lx=lx;sh.ly=ly;sh.lw=sh.parts?Math.max(...sh.parts.map(p=>p.b[2]-p.b[0])):0});
+  const mp=sh.parts?sh.parts.reduce((a,p)=>(p.b[2]-p.b[0])*(p.b[3]-p.b[1])>(a.b[2]-a.b[0])*(a.b[3]-a.b[1])?p:a):null;sh.mb=mp?mp.b:sh.b;sh.mp=mp?mp.path:null;sh.c=[(sh.mb[0]+sh.mb[2])/2,(sh.mb[1]+sh.mb[3])/2];sh.lx=lx;sh.ly=ly;sh.lw=sh.parts?Math.max(...sh.parts.map(p=>p.b[2]-p.b[0])):0});
  SCR.shapes=out;SCR.byCC=Object.fromEntries(out.map(x=>[x.cc,x]))}
-function scrDotPath(sh){const p=new Path2D();p.arc(sh.dot[0],sh.dot[1],Math.max(2.5,3.2/SCR.z),0,Math.PI*2);return p}
-const scrPathOf=sh=>sh.dot?scrDotPath(sh):sh.path;
+function scrDotPath(sh){const c=sh.dot||sh.c,p=new Path2D();p.arc(c[0],c[1],Math.max(2.5,3.2/SCR.z),0,Math.PI*2);return p}
+const scrPathOf=sh=>{if(sh.dot)return scrDotPath(sh);if(sh.small){const p=new Path2D(sh.path);p.addPath(scrDotPath(sh));return p}return sh.path};
+const scrChk=v=>((v*73)^(v>>3)^0x5a)&255||1;
 function scrBuildIds(){const K=SCR.K,w=Math.ceil(SCR.W/K),h=Math.ceil(SCR.H/K),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.scale(1/K,1/K);
- for(const sh of SCR.shapes){ctx.fillStyle=`rgb(${sh.i&255},${sh.i>>8},0)`;if(sh.dot){ctx.beginPath();ctx.arc(sh.dot[0],sh.dot[1],5,0,Math.PI*2);ctx.fill()}else ctx.fill(sh.path)}
+ for(const sh of SCR.shapes){ctx.fillStyle=`rgb(${sh.i&255},${sh.i>>8},${scrChk(sh.i)})`;if(sh.dot){ctx.beginPath();ctx.arc(sh.dot[0],sh.dot[1],5,0,Math.PI*2);ctx.fill()}else ctx.fill(sh.path)}
  const d=ctx.getImageData(0,0,w,h).data,id=new Uint16Array(w*h),tot=new Uint32Array(SCR.shapes.length+1);
- for(let k=0;k<w*h;k++){const v=d[k*4]|(d[k*4+1]<<8);if(v&&v<=SCR.shapes.length&&d[k*4+3]>200&&d[k*4+2]===0){id[k]=v;tot[v]++}}
- SCR.id=id;SCR.iw=w;SCR.ih=h;SCR.tot=tot;SCR.cnt=new Uint32Array(tot.length);SCR.done=new Uint8Array(w*h)}
+ for(let k=0;k<w*h;k++){const v=d[k*4]|(d[k*4+1]<<8);if(v&&v<=SCR.shapes.length&&d[k*4+3]===255&&d[k*4+2]===scrChk(v)){id[k]=v;tot[v]++}}
+ ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,w,h);ctx.scale(1/K,1/K);for(const sh of SCR.shapes){if(!sh.mp)continue;ctx.fillStyle=`rgb(${sh.i&255},${sh.i>>8},${scrChk(sh.i)})`;ctx.fill(sh.mp)}
+ const d2=ctx.getImageData(0,0,w,h).data,mt=new Uint32Array(tot.length);for(let k=0;k<w*h;k++){const v=d2[k*4]|(d2[k*4+1]<<8);if(v&&v<=SCR.shapes.length&&d2[k*4+3]===255&&d2[k*4+2]===scrChk(v))mt[v]++}
+ SCR.need=new Float32Array(tot.length);for(const sh of SCR.shapes){const t=tot[sh.i],m=mt[sh.i]||t;sh.small=!sh.dot&&t<8;SCR.need[sh.i]=Math.max(1,Math.min(t,m)*.5)}
+ SCR.id=id;SCR.iw=w;SCR.ih=h;SCR.tot=tot;SCR.cnt=new Uint32Array(tot.length);SCR.done=new Uint8Array(w*h);SCR.tiny=SCR.shapes.filter(sh=>sh.dot||sh.small)}
 const scrRev=cc=>!!(SETTINGS.scr&&SETTINGS.scr[cc]);
 /* ---- drawing (at screen resolution) ---- */
 function scrSetup(){const wrap=$('#scrWrap'),dpr=Math.min(3,window.devicePixelRatio||1),w=wrap.clientWidth,h=wrap.clientHeight;
@@ -1260,12 +1264,14 @@ function scrRecount(){SCR.cnt.fill(0);SCR.done.fill(0);SCR.strokes.forEach((st,i
 function scrPt(e){const r=$('#scrWrap').getBoundingClientRect();return[(e.clientX-r.left-SCR.tx)/SCR.z,(e.clientY-r.top-SCR.ty)/SCR.z]}
 function scrSeg(a,b){const st=SCR.cur;st.pts.push(b[0],b[1]);const ctx=$('#scrFoil').getContext('2d');scrView(ctx);ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineWidth=st.w;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0]+.01,b[1]);ctx.stroke();ctx.restore();
  const hit=new Set();scrMark(a,b,st.w/2,SCR.strokes.length-1,hit);
- for(const v of hit){const sh=SCR.shapes[v-1];if(scrRev(sh.cc))continue;if(SCR.cnt[v]>=Math.max(1,SCR.tot[v]*.5)){scrSetRev(sh.cc,true);st.rev.push(sh.cc);scrCelebrate(sh.cc)}}}
+ for(const v of hit){const sh=SCR.shapes[v-1];if(scrRev(sh.cc))continue;if(SCR.cnt[v]>=SCR.need[v]){scrSetRev(sh.cc,true);st.rev.push(sh.cc);scrCelebrate(sh.cc)}}
+ const r=st.w/2+Math.max(2.5,3.2/SCR.z);for(const sh of SCR.tiny){if(scrRev(sh.cc))continue;const c=sh.dot||sh.c,dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=L?Math.max(0,Math.min(1,((c[0]-a[0])*dx+(c[1]-a[1])*dy)/L)):0;
+  if(Math.hypot(a[0]+dx*t-c[0],a[1]+dy*t-c[1])<=r){scrSetRev(sh.cc,true);st.rev.push(sh.cc);scrCelebrate(sh.cc)}}}
 function scrSetRev(cc,on){SETTINGS.scr=SETTINGS.scr||{};if(on)SETTINGS.scr[cc]=true;else delete SETTINGS.scr[cc];const sh=SCR.byCC[cc];
  if(on&&sh){const ctx=$('#scrFoil').getContext('2d');scrView(ctx);ctx.save();ctx.globalCompositeOperation='destination-out';const P=scrPathOf(sh);ctx.fill(P);ctx.lineWidth=2/SCR.z;ctx.stroke(P);ctx.restore()}
  save();scrInfo()}
 function scrCelebrate(cc){try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}toast(`🎉 刮開了 ${GEO.m[cc]?.f||''} ${cname(cc)}！`)}
-function scrCover(cc){const sh=SCR.byCC[cc];if(!sh)return;const was=scrRev(cc),prev=SCR.cov[cc],partial=SCR.cnt[sh.i]>0;if(!was&&!partial){toast(`${cname(cc)} 還沒刮開`);return}
+function scrCover(cc){const sh=SCR.byCC[cc];if(!sh)return;const was=scrRev(cc),prev=SCR.cov[cc];
  SCR.acts.push({t:'c',cc,was,prev});SCR.cov[cc]=SCR.strokes.length;if(was)delete SETTINGS.scr[cc];save();scrRecount();scrRender();scrInfo();toast(`已把 ${cname(cc)} 蓋回去（可按「復原」）`)}
 function scrUndo(){const a=SCR.acts.pop();if(!a){toast('沒有可以復原的動作');return}
  if(a.t==='s'){const st=SCR.strokes.pop();(st.rev||[]).forEach(cc=>delete SETTINGS.scr[cc]);toast(st.rev.length?(st.rev.length>3?`已復原，${st.rev.length} 個國家蓋回去了`:`已復原，${st.rev.map(cc=>cname(cc)).join('、')} 蓋回去了`):'已復原上一筆')}
@@ -1274,7 +1280,7 @@ function scrUndo(){const a=SCR.acts.pop();if(!a){toast('沒有可以復原的動
  else if(a.t==='reset'){SETTINGS.scr=a.scr;SCR.strokes=a.strokes;SCR.cov=a.cov;toast('已恢復刮開的國家')}
  save();scrRecount();scrRender();scrInfo()}
 function scrAt(e){const [x,y]=scrPt(e),i=Math.floor(x/SCR.K),j=Math.floor(y/SCR.K);let v=i>=0&&j>=0&&i<SCR.iw&&j<SCR.ih?SCR.id[j*SCR.iw+i]:0;
- if(!v){let best=null,bd=14/SCR.z;for(const sh of SCR.shapes){if(!sh.dot)continue;const d=Math.hypot(sh.dot[0]-x,sh.dot[1]-y);if(d<bd){bd=d;best=sh}}return best}return SCR.shapes[v-1]}
+ if(!v){let best=null,bd=14/SCR.z+3;for(const sh of SCR.tiny){const c=sh.dot||sh.c,d=Math.hypot(c[0]-x,c[1]-y);if(d<bd){bd=d;best=sh}}return best}return SCR.shapes[v-1]}
 /* ---- UI ---- */
 function scrBeen(){const T=trips();return [...new Set(T.filter(t=>!t.transit).map(t=>t.cc).concat(T.some(t=>t.domestic)?[homeCC()]:[]))].filter(c=>c&&SCR.byCC[c])}
 function scrInfo(){const rev=Object.keys(SETTINGS.scr||{}).filter(c=>SETTINGS.scr[c]);$('#scrTitle').textContent=`刮刮樂地圖 · 已刮開 ${rev.length} 個國家`;
