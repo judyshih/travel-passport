@@ -20,7 +20,7 @@
 @font-face{font-family:"Barlow Condensed";font-weight:600;font-display:swap;src:url(fonts/barlow-condensed-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:"Barlow Condensed";font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:"Cormorant Garamond";font-weight:600;font-display:swap;src:url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2")}
-#busy,#cer,#viewer,.scrim,#v-map .mapwrap.fs{bottom:auto;height:var(--apph,100%)}.sheet{bottom:calc(0px - var(--gap,0px))}
+#busy,#cer,#viewer,.scrim,.mapwrap.fs{bottom:auto;height:var(--apph,100%)}.sheet{bottom:calc(0px - var(--gap,0px))}
 </style>
 <style>
 /* VOICE: a real passport — Taiwan-passport green cover, gold foil, guilloche paper, inked stamps
@@ -48,7 +48,7 @@ main{overflow:hidden;position:relative}.mtabs{display:grid;grid-template-columns
 .scrbar,.scrfoot{display:none}.scrwrap.fs .scrbar{display:flex;position:absolute;left:8px;right:8px;top:calc(var(--safe-t) + 8px);gap:6px;flex-wrap:wrap;align-items:center;z-index:2}
 .scrbar button{min-height:42px;padding:0 12px;border-radius:21px;border:0;background:rgba(14,20,40,.82);color:#f3e6bf;font-weight:600;font-size:14px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .scrbar .sb-done{background:var(--gold2);color:#16382b}.sb-seg{display:flex;background:rgba(14,20,40,.82);border-radius:21px;padding:2px}.sb-seg button{background:transparent;min-height:38px;padding:0 10px}.sb-seg button.on{background:#f3e6bf;color:#16382b}
-.scrwrap.fs .scrfoot{display:block;position:absolute;left:0;right:0;bottom:0;padding:8px 10px calc(var(--safe-b) + 10px);background:linear-gradient(transparent,rgba(8,12,26,.85));z-index:2}
+.scrwrap.fs .scrfoot{display:block;position:absolute;left:0;right:0;bottom:0;padding:8px 10px calc(var(--navpad,var(--safe-b)) + 10px);background:linear-gradient(transparent,rgba(8,12,26,.85));z-index:2}
 .sf-hint{color:#f3e6bf;font-size:13px;text-align:center;margin-bottom:6px;text-shadow:0 1px 2px #000}.sf-todo{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.sf-todo button{flex:none;min-height:38px;padding:0 12px;border-radius:19px;border:0;background:rgba(243,230,191,.95);color:#16382b;font-weight:600}
 .scrgo{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);min-height:44px;padding:0 18px;border-radius:22px;border:0;background:var(--gold2);color:#16382b;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.4);z-index:2}.scrwrap.fs .scrgo{display:none}
 body.scrfs nav,body.scrfs header{visibility:hidden}.scrdone{order:4;margin-top:12px;border-top:1px solid #e1e4d8;padding-top:10px}.scrdone h3{margin:0 0 6px;font-size:16px}.sd-r{margin:8px 0}.sd-r>b{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}.sd-l{display:flex;flex-wrap:wrap;gap:6px}.sd-l button{min-height:36px;padding:0 10px;border-radius:18px;border:1px solid #d9dccf;background:#fff;font-size:14px;color:var(--ink)}
@@ -134,9 +134,9 @@ nav button.on{color:var(--gold2)}
 .fsbtn{order:3;position:relative;align-self:flex-end;margin:-46px 10px 6px 0;z-index:3;height:36px;padding:0 12px;border-radius:18px;border:1px solid #cfd3c6;background:#fff;color:var(--ink);font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .twohint{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);z-index:4;text-align:center;color:#fff;background:rgba(0,0,0,.55);padding:16px;border-radius:12px;font-size:16px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .2s}
 .twohint small{font-weight:400;font-size:13px}.twohint.on{opacity:1}
-#v-map .mapwrap.fs{position:fixed;inset:0;z-index:25;border-radius:0;order:0}
-#v-map .mapwrap.fs #lmap{height:var(--apph,100vh)!important;min-height:0}
-#v-map .mapwrap.fs .leaflet-top{top:var(--safe-t)}#v-map .mapwrap.fs .leaflet-bottom{bottom:var(--safe-b)}
+.mapwrap.fs{position:fixed;inset:0;z-index:25;border-radius:0;order:0}
+.mapwrap.fs #lmap{height:var(--apph,100vh)!important;min-height:0}
+.mapwrap.fs .leaflet-top{top:var(--safe-t)}.mapwrap.fs .leaflet-bottom{bottom:var(--safe-b)}
 body.mapfs .fsbtn{position:fixed;top:calc(var(--safe-t) + 10px);right:calc(12px + env(safe-area-inset-right));margin:0;z-index:26}
 .leaflet-container{font:14px/1.4 -apple-system,"PingFang TC",sans-serif}
 .pin{width:32px;height:32px;border-radius:50%;background:#b42335;color:#fff;display:grid;place-items:center;font:700 13px/1 -apple-system,sans-serif;border:2px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.35)}
@@ -429,8 +429,8 @@ iPhone 從 Safari 選照片時，有時會把定位資訊拿掉。若匯入後�
 function fixAppHeight(){const h=window.innerHeight,ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
  const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=ios&&sa&&sh>h&&sh-h<160?sh-h:0;
  const r=document.documentElement.style;r.setProperty('--apph',h+'px');r.setProperty('--gap','0px');
- if(gap)r.setProperty('--navpad',`max(4px, calc(env(safe-area-inset-bottom) - ${gap}px))`);else r.removeProperty('--navpad');
- const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 44 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
+ if(gap)r.setProperty('--navpad',`max(4px, calc(env(safe-area-inset-bottom) - ${gap}px))`);else if(ios&&sa&&h>=sh-2)r.setProperty('--navpad','calc(max(env(safe-area-inset-top), env(safe-area-inset-bottom)) + 6px)');else r.removeProperty('--navpad');
+ const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 45 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
 fixAppHeight();addEventListener('resize',fixAppHeight);addEventListener('orientationchange',()=>setTimeout(fixAppHeight,300));
 
 {
@@ -876,7 +876,7 @@ function placePhotos(g){const ph=g.ps.filter(p=>p.th),label=(SHAPES['g:'+g.k]?.n
 const TOUCH=matchMedia('(pointer: coarse)').matches;let FS=false,hintT;
 /* one finger drags the map, two fingers zoom; the page scrolls from the area around the map */
 function setupTwoFinger(){LMAP.dragging.enable()}
-function setFS(on){FS=on;const w=$('#mapwrap');w.classList.toggle('fs',on);document.body.classList.toggle('mapfs',on);$('#fsBtn').textContent=on?'✕ 關閉全螢幕':'⛶ 全螢幕';
+function setFS(on){FS=on;const w=$('#mapwrap'),fb=$('#fsBtn');if(!setFS.home){setFS.home=document.createComment('map');w.parentNode.insertBefore(setFS.home,w)}if(on){document.body.appendChild(w);document.body.appendChild(fb)}else{setFS.home.parentNode.insertBefore(fb,setFS.home.nextSibling);setFS.home.parentNode.insertBefore(w,setFS.home.nextSibling)}w.classList.toggle('fs',on);document.body.classList.toggle('mapfs',on);$('#fsBtn').textContent=on?'✕ 關閉全螢幕':'⛶ 全螢幕';
  if(LMAP){LMAP.dragging.enable();setTimeout(()=>LMAP.invalidateSize(),60)}}
 $('#fsBtn').onclick=()=>setFS(!FS);
 function fitAll(){if(!LMAP)return;if(LPTS.length)LMAP.fitBounds(LPTS,{padding:[36,36],maxZoom:10});else LMAP.setView([25,121],2)}
@@ -1294,8 +1294,8 @@ function scrInfo(){const rev=Object.keys(SETTINGS.scr||{}).filter(c=>SETTINGS.sc
  if(SCR.fs)$('#scrFsHint').textContent=`已刮開 ${rev.length} 國 · `+(SCR.mode==='scratch'?'在國家上單指刮，只會刮到那一國；兩指縮放、移動':SCR.mode==='pan'?'單指移動地圖，兩指縮放':'點一下刮錯的國家，把它蓋回去');$('#scrMode').textContent=SETTINGS.scrMode==='flag'?'🎨 改成彩色':'🏳️ 改成國旗'}
 function scrSetMode(m){SCR.mode=m;$$('#scrModes button').forEach(b=>b.classList.toggle('on',b.dataset.sm===m));const w=$('#scrWrap');w.classList.toggle('pan',m==='pan');w.classList.toggle('cover',m==='cover');
  scrInfo()}
-function scrOpenFs(cc){if(SCR.fs)return;SCR.fs=true;$('#scrWrap').classList.add('fs');document.body.classList.add('scrfs');scrSetMode('scratch');requestAnimationFrame(()=>{scrFit();if(cc)scrZoomTo(cc,true);scrRender()})}
-function scrCloseFs(){SCR.fs=false;$('#scrWrap').classList.remove('fs','pan','cover');document.body.classList.remove('scrfs');requestAnimationFrame(()=>{scrFit(true);scrRender()})}
+function scrOpenFs(cc){if(SCR.fs)return;SCR.fs=true;const w=$('#scrWrap');if(!SCR.home){SCR.home=document.createComment('scr');w.parentNode.insertBefore(SCR.home,w)}document.body.appendChild(w);w.classList.add('fs');document.body.classList.add('scrfs');scrSetMode('scratch');requestAnimationFrame(()=>{scrFit();if(cc)scrZoomTo(cc,true);scrRender()})}
+function scrCloseFs(){SCR.fs=false;const w=$('#scrWrap');if(SCR.home)SCR.home.parentNode.insertBefore(w,SCR.home.nextSibling);w.classList.remove('fs','pan','cover');document.body.classList.remove('scrfs');requestAnimationFrame(()=>{scrFit(true);scrRender()})}
 function scrZoomTo(cc,quiet){const sh=SCR.byCC[cc];if(!sh)return;const B=sh.mb||sh.b,bw=B[2]-B[0]+8,bh=B[3]-B[1]+8;SCR.z=Math.min(SCR.zmax,Math.min(SCR.cw/(bw*1.8),SCR.ch/(bh*1.8)));
  SCR.tx=SCR.cw/2-(B[0]+B[2])/2*SCR.z;SCR.ty=SCR.ch/2-(B[1]+B[3])/2*SCR.z;scrClamp();scrRender();if(!quiet)toast(`把 ${cname(cc)} 刮開吧！`)}
 async function renderScratch(){if(!GEO)return;
