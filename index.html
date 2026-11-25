@@ -40,7 +40,13 @@ header{padding:calc(var(--safe-t) + 10px) 18px 10px;color:var(--gold2);display:f
 header h1{font:600 clamp(19px,5.6vw,24px)/1.15 "Cormorant Garamond",serif;letter-spacing:.04em;margin:0;flex:1}
 header small{display:block;font:500 12px "Barlow Condensed",sans-serif;color:#9db8aa;letter-spacing:.12em}
 .icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid #2d5443;background:#1d4334;color:var(--gold2);display:grid;place-items:center}
-main{overflow:hidden;position:relative}.dseg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 2px}.dseg button{min-height:44px;border-radius:9px;border:1px solid #cfd5c8;background:#fff;color:var(--ink);font-size:13.5px;line-height:1.2;padding:4px}.dseg button.on{background:var(--navy);color:var(--gold2);border-color:var(--navy)}
+main{overflow:hidden;position:relative}.mtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 10px}.mtabs button{min-height:44px;border-radius:12px;border:1px solid rgba(232,207,138,.4);background:rgba(0,0,0,.28);color:var(--gold2);font-weight:600;font-size:15px}.mtabs button.on{background:var(--gold2);color:#16382b;border-color:var(--gold2)}
+.scrwrap{position:relative;height:min(60vh,560px);overflow:hidden;border-radius:10px;touch-action:none;background:radial-gradient(120% 90% at 50% 40%,#25325a 0%,#141c36 70%,#0e1428 100%);order:3;-webkit-user-select:none;user-select:none}
+.scrwrap.pan{cursor:grab}.scrstage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}.scrstage canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+.scrbusy{position:absolute;inset:0;display:grid;place-items:center;color:var(--gold2);font-weight:600;background:rgba(10,14,30,.6)}.scrbusy[hidden]{display:none}
+#v-map .scrwrap{grid-row:2 / -1}
+@media (min-width:600px) and (min-height:540px) and (min-aspect-ratio:3/4){.scrwrap{height:calc(100vh - 260px);min-height:400px}}
+.dseg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 2px}.dseg button{min-height:44px;border-radius:9px;border:1px solid #cfd5c8;background:#fff;color:var(--ink);font-size:13.5px;line-height:1.2;padding:4px}.dseg button.on{background:var(--navy);color:var(--gold2);border-color:var(--navy)}
 html[data-bg="icons"] body{background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27260%27 height=%27260%27 viewBox=%270 0 260 260%27%3E%3Cg fill=%27none%27 stroke=%27#e8cf8a%27 stroke-opacity=%27.2%27 stroke-width=%271.6%27 stroke-linejoin=%27round%27 stroke-linecap=%27round%27%3E%0A%3Cpath transform=%27translate(18 22) scale(1.9) rotate(-20 12 12)%27 d=%27M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z%27/%3E%0A%3Cg transform=%27translate(190 46)%27%3E%3Ccircle r=%2717%27/%3E%3Cpath d=%27M0-14L4 0L0 14L-4 0zM-14 0L0 4L14 0L0-4z%27/%3E%3C/g%3E%0A%3Cpath transform=%27translate(96 92)%27 d=%27M0 30L18 6L28 18L36 10L56 30z%27/%3E%0A%3Cg transform=%27translate(24 150)%27%3E%3Crect y=%276%27 width=%2738%27 height=%2726%27 rx=%275%27/%3E%3Ccircle cx=%2719%27 cy=%2719%27 r=%277%27/%3E%3Cpath d=%27M11 6l3-5h10l3 5%27/%3E%3C/g%3E%0A%3Cg transform=%27translate(196 150)%27%3E%3Crect y=%278%27 width=%2732%27 height=%2728%27 rx=%274%27/%3E%3Cpath d=%27M11 8V3h10v5M0 19h32M9 36v3M23 36v3%27/%3E%3C/g%3E%0A%3Cpath transform=%27translate(110 176)%27 d=%27M15 44Q18 22 14 6M14 6Q4 1-3 8M14 6Q25-1 31 6M14 6Q5 10 3 19M14 6Q23 10 26 19%27/%3E%0A%3Cg transform=%27translate(150 110)%27%3E%3Ccircle r=%2714%27/%3E%3Cellipse rx=%276%27 ry=%2714%27/%3E%3Cpath d=%27M-14 0h28%27/%3E%3C/g%3E%0A%3Cpath d=%27M60 240Q130 200 230 236%27 stroke-dasharray=%272 7%27/%3E%3Cpath d=%27M70 90Q120 60 170 70%27 stroke-dasharray=%272 7%27/%3E%3C/g%3E%3C/svg%3E") 0 0/260px 260px,radial-gradient(120% 80% at 50% 0%,#245a44 0%,#16382b 50%,#0c231a 100%)}
 html[data-bg="sunset"] body{background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%27360%27 viewBox=%270 0 360 360%27%3E%3Cg fill=%27none%27 stroke=%27#fff%27 stroke-opacity=%27.2%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-dasharray=%272 8%27%3E%3Cpath d=%27M-10 120Q120 30 260 90T380 70%27/%3E%3Cpath d=%27M-10 300Q140 200 280 260T380 250%27/%3E%3C/g%3E%0A%3Cg fill=%27#fff%27 fill-opacity=%27.28%27%3E%3Cpath transform=%27translate(242 70) scale(1.1) rotate(-12 12 12)%27 d=%27M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z%27/%3E%3Cpath transform=%27translate(96 214) scale(.9) rotate(-25 12 12)%27 d=%27M21 12c0-.8-.7-1.3-1.5-1.3H15L10.5 3H8.6l2.2 7.7H6.4L4.6 8.4H3l1.2 3.6L3 15.6h1.6l1.8-2.3h4.4L8.6 21h1.9l4.5-7.7h4.5c.8 0 1.5-.5 1.5-1.3z%27/%3E%3C/g%3E%0A%3Cg fill=%27#fff%27 fill-opacity=%27.35%27%3E%3Ccircle cx=%2740%27 cy=%2740%27 r=%271.2%27/%3E%3Ccircle cx=%27170%27 cy=%2722%27 r=%271%27/%3E%3Ccircle cx=%27320%27 cy=%27160%27 r=%271.3%27/%3E%3Ccircle cx=%27210%27 cy=%27170%27 r=%27.9%27/%3E%3Ccircle cx=%2760%27 cy=%27190%27 r=%271%27/%3E%3Ccircle cx=%27300%27 cy=%27320%27 r=%271%27/%3E%3Ccircle cx=%27150%27 cy=%27330%27 r=%271.2%27/%3E%3C/g%3E%3C/svg%3E") 0 0/360px 360px,linear-gradient(180deg,#14223f 0%,#2c2d58 38%,#6b3b67 70%,#9a4f5c 100%);--navbg:rgba(20,22,48,.92);--navbd:#3a3a66}
 html[data-bg="map"] body{background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27340%27 height=%27340%27 viewBox=%27-170 -170 340 340%27%3E%3Cg fill=%27none%27 stroke=%27#e8cf8a%27 stroke-opacity=%27.16%27 stroke-width=%271.5%27%3E%3Ccircle r=%27150%27/%3E%3Ccircle r=%27138%27/%3E%3Ccircle r=%2760%27/%3E%3Cpath d=%27M0-160L18-18L160 0L18 18L0 160L-18 18L-160 0L-18-18z%27/%3E%3Cpath d=%27M0-160V160M-160 0H160%27 stroke-dasharray=%272 6%27/%3E%3Cpath d=%27M-90-90L-10 0L-90 90M90-90L10 0L90 90%27 stroke-opacity=%27.1%27/%3E%3C/g%3E%3Cg fill=%27#e8cf8a%27 fill-opacity=%27.18%27 font-family=%27serif%27 font-size=%2722%27 text-anchor=%27middle%27%3E%3Ctext y=%27-118%27%3EN%3C/text%3E%3Ctext y=%27134%27%3ES%3C/text%3E%3Ctext x=%27126%27 y=%278%27%3EE%3C/text%3E%3Ctext x=%27-126%27 y=%278%27%3EW%3C/text%3E%3C/g%3E%3C/svg%3E") right -60px bottom 40px/340px 340px no-repeat,repeating-linear-gradient(0deg,rgba(232,207,138,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(232,207,138,.06) 0 1px,transparent 1px 56px),radial-gradient(110% 80% at 30% 10%,#1b4b52 0%,#123a40 50%,#0a2428 100%);--navbg:rgba(8,32,36,.94);--navbd:#24484d}
@@ -340,10 +346,20 @@ textarea{min-height:120px;resize:vertical}
 <div class="flipnav"><button id="pPrev" aria-label="上一頁">‹</button><div class="dots" id="dots"></div><button id="pNext" aria-label="下一頁">›</button></div>
 </section>
 <section class="view" id="v-map">
+<div class="mtabs" id="mapTabs" role="tablist"><button type="button" class="on" data-mt="a" role="tab">🗺️ 足跡地圖</button><button type="button" data-mt="b" role="tab">🪙 刮刮樂地圖</button></div>
+<div id="mapA">
 <div class="card"><h2 id="mapTitle">足跡地圖</h2>
 <div class="mapwrap" id="mapwrap"></div><button class="fsbtn" id="fsBtn" aria-label="全螢幕地圖">⛶ 全螢幕</button><div class="twohint" id="twoHint"></div>
 <div class="maphint" id="mapHint">單指拖曳移動地圖、兩指縮放；要捲動頁面請滑地圖外面的地方。放大到國家的大小會出現飛行路線。</div><div class="zoom"><button class="chip" id="routeBtn">✈︎ 飛行路線</button><button class="chip" id="fitAll">看全部足跡</button><button class="chip" id="fitWorld">整個世界</button></div>
 <div class="legend" id="legend"></div></div>
+</div>
+<div id="mapB" hidden>
+<div class="card"><h2 id="scrTitle">刮刮樂地圖</h2>
+<div class="scrwrap" id="scrWrap"><div class="scrstage" id="scrStage"><canvas id="scrBase"></canvas><canvas id="scrFoil"></canvas></div><div class="scrbusy" id="scrBusy">準備刮刮樂…</div></div>
+<div class="maphint" id="scrHint">用手指把去過的國家刮開，刮到大約一半會整個打開；兩指縮放、移動地圖。</div>
+<div class="zoom"><button class="chip" id="scrMode">🏳️ 改成國旗</button><button class="chip" id="scrPan">✋ 移動模式</button><button class="chip" id="scrAuto">✨ 一鍵刮開去過的國家</button><button class="chip" id="scrFit">整個世界</button><button class="chip" id="scrReset">全部蓋回去</button></div>
+<div class="legend" id="scrTodo"></div></div>
+</div>
 </section>
 <section class="view" id="v-stats"><div id="stats"></div></section>
 <section class="view" id="v-set">
@@ -402,7 +418,7 @@ function fixAppHeight(){const h=window.innerHeight,ios=/iPhone|iPad|iPod/.test(n
  const land=window.innerWidth>window.innerHeight,sh=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=ios&&sa&&sh>h&&sh-h<160?sh-h:0;
  const r=document.documentElement.style;r.setProperty('--apph',h+'px');r.setProperty('--gap','0px');
  if(gap)r.setProperty('--navpad',`max(4px, calc(env(safe-area-inset-bottom) - ${gap}px))`);else r.removeProperty('--navpad');
- const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 38 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
+ const vi=document.getElementById('verInfo');if(vi)vi.textContent=`版本 39 · 畫面 ${h}/${sh}${ios&&sa?' · 主畫面模式':''}`}
 fixAppHeight();addEventListener('resize',fixAppHeight);addEventListener('orientationchange',()=>setTimeout(fixAppHeight,300));
 
 {
@@ -416,9 +432,9 @@ function cleanPhoto(p){if(!p||typeof p!=='object'||typeof p.id!=='string'||!p.id
  if(o.lat===null||o.lon===null){o.lat=null;o.lon=null}const te=num(p.tend,0,4102444800000);if(te!==null&&te>t)o.tend=te;if(p.nodate===true)o.nodate=true;if(p.fixed===true)o.fixed=true;if(p.stop===true)o.stop=true;if(p.dp==='y'||p.dp==='m')o.dp=p.dp;if(typeof p.pin==='string'&&p.pin)o.pin=p.pin.slice(0,120);if(typeof p.pinPlace==='string'&&p.pinPlace)o.pinPlace=str(p.pinPlace,80);return o}
 function cleanNotes(n){const o={};if(n&&typeof n==='object')for(const k of Object.keys(n).slice(0,5000))if(typeof n[k]==='string')o[str(k,200)]=n[k].slice(0,20000);return o}
 function cleanSettings(x){const o={};if(!x||typeof x!=='object')return o;if(typeof x.name==='string')o.name=str(x.name,60);
- if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;if(x.cl3===true)o.cl3=true;if(['icons','sunset','map','classic'].includes(x.bg))o.bg=x.bg;
+ if(typeof x.home==='string'&&/^([A-Z]{2})?$/.test(x.home))o.home=x.home;if(x.routesAlways===true)o.routesAlways=true;if(x.cl3===true)o.cl3=true;if(['icons','sunset','map','classic'].includes(x.bg))o.bg=x.bg;if(x.scrMode==='flag')o.scrMode='flag';
  const flags=(v,onlyTrue)=>{const r={};if(v&&typeof v==='object')for(const k of Object.keys(v).slice(0,2000))if(typeof v[k]==='boolean'&&(!onlyTrue||v[k]))r[str(k,120)]=v[k];return r};
- if(x.transit)o.transit=flags(x.transit);if(x.hideJ)o.hideJ=flags(x.hideJ,true);return o}
+ if(x.transit)o.transit=flags(x.transit);if(x.hideJ)o.hideJ=flags(x.hideJ,true);if(x.scr)o.scr=flags(x.scr,true);return o}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DAY=864e5, GAP=4*DAY;
 let GEO=null, PHOTOS=[], NOTES={}, NAMES={}, SETTINGS={};
@@ -1160,7 +1176,93 @@ function applyBg(){const b=SETTINGS.bg||'icons';document.documentElement.dataset
 $('#bgPick').onclick=async e=>{const b=e.target.closest('[data-bg]');if(!b)return;SETTINGS.bg=b.dataset.bg;applyBg();await save()};
 $('#nameIn').onchange=async e=>{SETTINGS.name=e.target.value.trim();await save();$('#title').textContent=SETTINGS.name||'我的旅行護照'};
 /* ---------- nav ---------- */
-function go(v){if(FS&&v!=='map')setFS(false);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$('#imp').style.display=$('#manual2').style.display=v==='pass'?'':'none';if(v==='map')renderMap()}
+/* ---------- scratch-off world map: a gold foil over the world, scratch a country (or its flag) open with a finger ---------- */
+const SCR={W:3000,H:1183,lat0:84,lat1:-58,K:5,built:false,mode:null,shapes:[],id:null,tot:null,cnt:null,done:null,scale:1,tx:0,ty:0,pan:false};
+const SCR_COL=['#e8573c','#f2a541','#f2cf3f','#76c27b','#43b0bd','#5b8bd9','#9b6fd1','#e46fa7','#f08a5d','#5fc0a0','#d9734e','#8fb84a'];
+const sP=(lon,lat)=>[(lon+180)/360*SCR.W,(SCR.lat0-lat)/(SCR.lat0-SCR.lat1)*SCR.H];
+function scrShapes(){const out=[],seen=new Set();
+ for(const f of GEO.f){const cc=f.a;if(!cc||cc==='AQ'||cc==='-99')continue;seen.add(cc);const parts=[];
+  for(const poly of f.p){const rings=poly.map(r=>{let xs=r.map(p=>p[0]);const span=Math.max(...xs)-Math.min(...xs);return r.map(([x,y])=>sP(span>300&&x<0?x+360:x,y))});
+   let b=[1e9,1e9,-1e9,-1e9];for(const [x,y] of rings[0]){b[0]=Math.min(b[0],x);b[1]=Math.min(b[1],y);b[2]=Math.max(b[2],x);b[3]=Math.max(b[3],y)}parts.push({rings,b})}
+  out.push({cc,parts})}
+ for(const cc in GEO.m){if(seen.has(cc)||cc==='AQ')continue;const ll=GEO.m[cc].ll;if(!ll||ll[0]<SCR.lat1||ll[0]>SCR.lat0)continue;const [x,y]=sP(ll[1],ll[0]);out.push({cc,dot:[x,y,9]})}
+ out.forEach((sh,i)=>{sh.i=i+1;sh.col=SCR_COL[hash(sh.cc)%SCR_COL.length];if(sh.dot){const [x,y,r]=sh.dot;sh.b=[x-r,y-r,x+r,y+r]}else{sh.b=sh.parts.reduce((a,p)=>[Math.min(a[0],p.b[0]),Math.min(a[1],p.b[1]),Math.max(a[2],p.b[2]),Math.max(a[3],p.b[3])],[1e9,1e9,-1e9,-1e9])}});
+ return out}
+function scrPath(ctx,sh,part){ctx.beginPath();if(sh.dot){const [x,y,r]=sh.dot;ctx.arc(x,y,r,0,Math.PI*2);return}
+ for(const p of part?[part]:sh.parts)for(const r of p.rings){r.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath()}}
+function scrLabel(ctx,sh,fill,stroke){const w=sh.b[2]-sh.b[0];if(sh.dot||w<46)return;const m=GEO.m[sh.cc];if(!m)return;
+ let [x,y]=m.ll?sP(m.ll[1],m.ll[0]):[(sh.b[0]+sh.b[2])/2,(sh.b[1]+sh.b[3])/2];if(x<sh.b[0]||x>sh.b[2]||y<sh.b[1]||y>sh.b[3]){x=(sh.b[0]+sh.b[2])/2;y=(sh.b[1]+sh.b[3])/2}
+ const name=(m.e||sh.cc).toUpperCase(),fs=Math.max(9,Math.min(30,w*.1));ctx.font=`700 ${fs}px "Barlow Condensed","Arial Narrow",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+ if(stroke){ctx.lineWidth=fs*.22;ctx.strokeStyle=stroke;ctx.strokeText(name,x,y)}ctx.fillStyle=fill;ctx.fillText(name,x,y)}
+function scrDrawBase(){const c=$('#scrBase'),ctx=c.getContext('2d');ctx.clearRect(0,0,SCR.W,SCR.H);const flag=SETTINGS.scrMode==='flag';
+ for(const sh of SCR.shapes){ctx.fillStyle=sh.col;scrPath(ctx,sh);ctx.fill();
+  if(flag){const fl=GEO.m[sh.cc]?.f;if(fl){for(const part of sh.dot?[null]:sh.parts){const b=part?part.b:sh.b,bw=b[2]-b[0],bh=b[3]-b[1];if(bw<4||bh<4)continue;
+   ctx.save();scrPath(ctx,sh,part);ctx.clip();ctx.font='100px "Apple Color Emoji","Noto Color Emoji","Segoe UI Emoji",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+   const ew=ctx.measureText(fl).width||100;ctx.translate((b[0]+b[2])/2,(b[1]+b[3])/2);ctx.scale(bw/ew*1.45,bh/100*1.75);ctx.fillText(fl,0,6);ctx.restore()}}}
+  ctx.lineWidth=1.3;ctx.strokeStyle='rgba(20,20,30,.55)';scrPath(ctx,sh);ctx.stroke()}
+ if(!flag)for(const sh of SCR.shapes)scrLabel(ctx,sh,'#fff','rgba(0,0,0,.45)')}
+function scrDrawFoil(){const c=$('#scrFoil'),ctx=c.getContext('2d');ctx.globalCompositeOperation='source-over';ctx.clearRect(0,0,SCR.W,SCR.H);
+ const g=ctx.createLinearGradient(0,0,SCR.W,SCR.H);g.addColorStop(0,'#c99a3e');g.addColorStop(.3,'#f1d68c');g.addColorStop(.55,'#d3a54a');g.addColorStop(.8,'#f4dd9b');g.addColorStop(1,'#bf8f36');
+ const n=document.createElement('canvas');n.width=n.height=96;const nx=n.getContext('2d');for(let i=0;i<900;i++){nx.fillStyle=`rgba(${Math.random()<.5?'255,250,220':'120,85,30'},${Math.random()*.35})`;nx.fillRect(Math.random()*96,Math.random()*96,1.4,1.4)}
+ const pat=ctx.createPattern(n,'repeat');
+ for(const sh of SCR.shapes){scrPath(ctx,sh);ctx.fillStyle=g;ctx.fill();ctx.fillStyle=pat;ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle='rgba(110,78,28,.6)';ctx.stroke()}
+ for(const sh of SCR.shapes)scrLabel(ctx,sh,'rgba(100,70,25,.55)',null);
+ for(const sh of SCR.shapes)if(SETTINGS.scr&&SETTINGS.scr[sh.cc])scrClear(sh)}
+function scrClear(sh){const ctx=$('#scrFoil').getContext('2d');ctx.save();ctx.globalCompositeOperation='destination-out';scrPath(ctx,sh);ctx.fill();ctx.lineWidth=3;ctx.stroke();ctx.restore()}
+function scrBuildIds(){const w=Math.ceil(SCR.W/SCR.K),h=Math.ceil(SCR.H/SCR.K),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.scale(1/SCR.K,1/SCR.K);
+ for(const sh of SCR.shapes){ctx.fillStyle=`rgb(${sh.i&255},${sh.i>>8},0)`;scrPath(ctx,sh);ctx.fill()}
+ const d=ctx.getImageData(0,0,w,h).data,id=new Uint16Array(w*h),tot=new Uint32Array(SCR.shapes.length+1);
+ for(let k=0;k<w*h;k++){const v=d[k*4]|(d[k*4+1]<<8);if(v&&v<=SCR.shapes.length&&d[k*4+3]>200&&d[k*4+2]===0){id[k]=v;tot[v]++}}
+ SCR.id=id;SCR.iw=w;SCR.ih=h;SCR.tot=tot;SCR.cnt=new Uint32Array(tot.length);SCR.done=new Uint8Array(w*h)}
+async function renderScratch(){if(!GEO)return;const wrap=$('#scrWrap'),st=$('#scrStage');
+ if(!SCR.built){$('#scrBusy').hidden=false;await sleep(30);SCR.shapes=scrShapes();for(const c of [$('#scrBase'),$('#scrFoil')]){c.width=SCR.W;c.height=SCR.H}scrBuildIds();SCR.built=true;SCR.mode=null;bindScratch()}
+ if(SCR.mode!==SETTINGS.scrMode+'|'+JSON.stringify(SETTINGS.scr||{})){scrDrawBase();scrDrawFoil();SCR.cnt.fill(0);SCR.done.fill(0);SCR.mode=SETTINGS.scrMode+'|'+JSON.stringify(SETTINGS.scr||{})}
+ $('#scrBusy').hidden=true;$('#scrMode').textContent=SETTINGS.scrMode==='flag'?'🎨 改成彩色':'🏳️ 改成國旗';
+ const sw=wrap.clientWidth,sh=sw*SCR.H/SCR.W;st.style.width=sw+'px';st.style.height=sh+'px';if(!SCR.fitDone){scrFit();SCR.fitDone=true}else scrApply();scrInfo()}
+function scrFit(){const wrap=$('#scrWrap'),sw=wrap.clientWidth,sh=sw*SCR.H/SCR.W,wh=wrap.clientHeight;SCR.scale=Math.max(1,wh/sh);const H=homeCC(),ll=H&&GEO.m[H]?.ll;const cx=(ll?sP(ll[1],ll[0])[0]:SCR.W*.6)/SCR.W*sw;
+ SCR.tx=sw/2-cx*SCR.scale;SCR.ty=(wh-sh*SCR.scale)/2;scrApply()}
+function scrApply(){const wrap=$('#scrWrap'),sw=wrap.clientWidth,sh=sw*SCR.H/SCR.W,wh=wrap.clientHeight,W=sw*SCR.scale,Hh=sh*SCR.scale;
+ SCR.tx=W<=sw?(sw-W)/2:Math.min(0,Math.max(sw-W,SCR.tx));SCR.ty=Hh<=wh?(wh-Hh)/2:Math.min(0,Math.max(wh-Hh,SCR.ty));$('#scrStage').style.transform=`translate(${SCR.tx}px,${SCR.ty}px) scale(${SCR.scale})`}
+function scrInfo(){const rev=Object.keys(SETTINGS.scr||{}).filter(c=>SETTINGS.scr[c]);$('#scrTitle').textContent=`刮刮樂地圖 · 已刮開 ${rev.length} 個國家`;
+ const T=trips(),been=[...new Set(T.filter(t=>!t.transit).map(t=>t.cc).concat(T.some(t=>t.domestic)?[homeCC()]:[]))].filter(c=>c&&SCR.shapes.some(s=>s.cc===c)),todo=been.filter(c=>!SETTINGS.scr?.[c]);
+ $('#scrTodo').innerHTML=todo.length?`<span style="color:var(--mute)">去過還沒刮開：</span>${todo.map(c=>`<button data-sc="${esc(c)}">${GEO.m[c]?.f||''} ${esc(cname(c))}</button>`).join('')}`:been.length?'<span>去過的國家都刮開了 🎉</span>':'<span>蓋了入境章的國家會列在這裡，提醒你去刮開</span>'}
+function scrPoint(e){const r=$('#scrWrap').getBoundingClientRect(),sw=$('#scrWrap').clientWidth;const lx=(e.clientX-r.left-SCR.tx)/SCR.scale,ly=(e.clientY-r.top-SCR.ty)/SCR.scale;return[lx*SCR.W/sw,ly*SCR.W/sw]}
+function scrScratch(a,b){const ctx=$('#scrFoil').getContext('2d'),sw=$('#scrWrap').clientWidth,rad=15*SCR.W/sw/SCR.scale;
+ ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=rad*2;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0]+.01,b[1]);ctx.stroke();ctx.restore();
+ const K=SCR.K,steps=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/(rad*.5))),rr=Math.ceil(rad/K),hit=new Set();
+ for(let s=0;s<=steps;s++){const x=(a[0]+(b[0]-a[0])*s/steps)/K,y=(a[1]+(b[1]-a[1])*s/steps)/K;
+  for(let j=Math.max(0,Math.floor(y-rr));j<=Math.min(SCR.ih-1,Math.ceil(y+rr));j++)for(let i=Math.max(0,Math.floor(x-rr));i<=Math.min(SCR.iw-1,Math.ceil(x+rr));i++){
+   if((i-x)**2+(j-y)**2>rr*rr)continue;const k=j*SCR.iw+i,v=SCR.id[k];if(!v||SCR.done[k])continue;SCR.done[k]=1;SCR.cnt[v]++;hit.add(v)}}
+ for(const v of hit){const sh=SCR.shapes[v-1];if(SETTINGS.scr?.[sh.cc])continue;if(SCR.cnt[v]>=Math.max(1,SCR.tot[v]*.5))scrReveal(sh)}}
+async function scrReveal(sh,quiet){SETTINGS.scr=SETTINGS.scr||{};if(SETTINGS.scr[sh.cc])return;SETTINGS.scr[sh.cc]=true;scrClear(sh);SCR.mode=SETTINGS.scrMode+'|'+JSON.stringify(SETTINGS.scr);
+ if(!quiet){try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}toast(`🎉 刮開了 ${GEO.m[sh.cc]?.f||''} ${cname(sh.cc)}！`)}scrInfo();await save()}
+function scrZoomTo(cc){const sh=SCR.shapes.find(s=>s.cc===cc);if(!sh)return;const wrap=$('#scrWrap'),sw=wrap.clientWidth,wh=wrap.clientHeight,k=sw/SCR.W,bw=(sh.b[2]-sh.b[0])*k,bh=(sh.b[3]-sh.b[1])*k;
+ SCR.scale=Math.max(1,Math.min(14,Math.min(sw/(bw*2.2+1),wh/(bh*2.2+1))));SCR.tx=sw/2-(sh.b[0]+sh.b[2])/2*k*SCR.scale;SCR.ty=wh/2-(sh.b[1]+sh.b[3])/2*k*SCR.scale;scrApply();toast(`把 ${cname(cc)} 刮開吧！`)}
+function bindScratch(){const wrap=$('#scrWrap'),P=new Map();let last=null,pin=null;
+ wrap.addEventListener('pointerdown',e=>{wrap.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(P.size===2){last=null;const [p1,p2]=[...P.values()];pin={d:Math.hypot(p1.x-p2.x,p1.y-p2.y)||1,mx:(p1.x+p2.x)/2,my:(p1.y+p2.y)/2,s:SCR.scale,tx:SCR.tx,ty:SCR.ty}}
+  else if(P.size===1){pin=null;last=SCR.pan||e.button===2?{pan:true,x:e.clientX,y:e.clientY,tx:SCR.tx,ty:SCR.ty}:{p:scrPoint(e),moved:false}}});
+ wrap.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});const r=wrap.getBoundingClientRect();
+  if(pin&&P.size>=2){const [p1,p2]=[...P.values()],d=Math.hypot(p1.x-p2.x,p1.y-p2.y)||1,mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;const s=Math.max(1,Math.min(16,pin.s*d/pin.d));
+   const px=(pin.mx-r.left-pin.tx)/pin.s,py=(pin.my-r.top-pin.ty)/pin.s;SCR.scale=s;SCR.tx=mx-r.left-px*s;SCR.ty=my-r.top-py*s;scrApply();return}
+  if(!last)return;if(last.pan){SCR.tx=last.tx+e.clientX-last.x;SCR.ty=last.ty+e.clientY-last.y;scrApply();return}
+  const p=scrPoint(e);scrScratch(last.p,p);last={p,moved:true}});
+ const up=e=>{P.delete(e.pointerId);if(P.size<2)pin=null;if(!P.size)last=null;else if(P.size===1&&!SCR.pan){const q=[...P.values()][0];last={p:scrPoint({clientX:q.x,clientY:q.y})}}};
+ wrap.addEventListener('pointerup',e=>{if(last&&!last.pan&&!last.moved)scrScratch(last.p,last.p);up(e)});wrap.addEventListener('pointercancel',up);wrap.addEventListener('contextmenu',e=>e.preventDefault());
+ wrap.addEventListener('wheel',e=>{e.preventDefault();const r=wrap.getBoundingClientRect(),s=Math.max(1,Math.min(16,SCR.scale*(e.deltaY<0?1.15:1/1.15))),px=(e.clientX-r.left-SCR.tx)/SCR.scale,py=(e.clientY-r.top-SCR.ty)/SCR.scale;
+  SCR.scale=s;SCR.tx=e.clientX-r.left-px*s;SCR.ty=e.clientY-r.top-py*s;scrApply()},{passive:false});
+ $('#scrMode').onclick=async()=>{SETTINGS.scrMode=SETTINGS.scrMode==='flag'?undefined:'flag';if(!SETTINGS.scrMode)delete SETTINGS.scrMode;await save();$('#scrBusy').hidden=false;await sleep(30);scrDrawBase();$('#scrBusy').hidden=true;$('#scrMode').textContent=SETTINGS.scrMode==='flag'?'🎨 改成彩色':'🏳️ 改成國旗';SCR.mode=SETTINGS.scrMode+'|'+JSON.stringify(SETTINGS.scr||{})};
+ $('#scrPan').onclick=()=>{SCR.pan=!SCR.pan;wrap.classList.toggle('pan',SCR.pan);$('#scrPan').textContent=SCR.pan?'🪙 刮開模式':'✋ 移動模式';toast(SCR.pan?'現在單指是移動地圖':'現在單指是刮開')};
+ $('#scrFit').onclick=()=>{SCR.scale=1;scrApply()};
+ $('#scrAuto').onclick=async()=>{const T=trips(),been=[...new Set(T.filter(t=>!t.transit).map(t=>t.cc).concat(T.some(t=>t.domestic)?[homeCC()]:[]))].filter(c=>c&&!SETTINGS.scr?.[c]);const list=SCR.shapes.filter(s=>been.includes(s.cc));
+  if(!list.length)return toast('去過的國家都已經刮開了');for(const sh of list){await scrReveal(sh,true);await sleep(220)}toast(`✨ 刮開了 ${list.length} 個國家`)};
+ let armed=false;$('#scrReset').onclick=async e=>{if(!armed){armed=true;e.target.textContent='再按一次確認蓋回去';setTimeout(()=>{armed=false;e.target.textContent='全部蓋回去'},3000);return}
+  armed=false;e.target.textContent='全部蓋回去';SETTINGS.scr={};await save();SCR.mode=null;renderScratch();toast('金箔都蓋回去了，可以重新刮')};
+ $('#scrTodo').onclick=e=>{const b=e.target.closest('[data-sc]');if(b)scrZoomTo(b.dataset.sc)};
+ addEventListener('resize',()=>{if(!$('#mapB').hidden&&$('#v-map').classList.contains('on')){const sw=wrap.clientWidth;$('#scrStage').style.width=sw+'px';$('#scrStage').style.height=sw*SCR.H/SCR.W+'px';scrApply()}})}
+$('#mapTabs').onclick=e=>{const b=e.target.closest('[data-mt]');if(!b)return;const B=b.dataset.mt==='b';$$('#mapTabs button').forEach(x=>x.classList.toggle('on',x===b));$('#mapA').hidden=B;$('#mapB').hidden=!B;if(B)renderScratch();else renderMap()};
+
+function go(v){if(FS&&v!=='map')setFS(false);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$('#imp').style.display=$('#manual2').style.display=v==='pass'?'':'none';if(v==='map'){if($('#mapB').hidden)renderMap();else renderScratch()}}
 $$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2400)}
 /* one-time: every photo with GPS gets the city it was really taken in (abroad in English, at home in Chinese); photos edited by hand stay as they are */
