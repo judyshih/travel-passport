@@ -1,4 +1,4 @@
-const V='passport-v40';
+const V='passport-v41';
 const SHELL=['./','index.html','countries.json','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png','lib/leaflet/leaflet.js','lib/leaflet/leaflet.css','fonts/barlow-condensed-latin-500-normal.woff2','fonts/barlow-condensed-latin-600-normal.woff2','fonts/barlow-condensed-latin-700-normal.woff2','fonts/cormorant-garamond-latin-600-normal.woff2'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))));self.clients.claim()});
